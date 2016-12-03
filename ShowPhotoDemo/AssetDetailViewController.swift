@@ -9,30 +9,36 @@
 import UIKit
 import Photos
 
-class AssetDetailViewController: UIViewController {
-    
-    var asset: HWAsset!
+private let assetDetailCell = "AssetDetailCell"
 
+class AssetDetailViewController: UICollectionViewController {
+    
+    var assets = [HWAsset]()
+    var index: IndexPath!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+}
+
+// MARK: - 自定义布局
+class AssetDetailLayout: UICollectionViewFlowLayout {
+    // 准备布局
+    override func prepare() {
+        // 1.设置每一个 cell 的尺寸
+        itemSize = UIScreen.main.bounds.size
+        // 2.设置cell之间的间隙
+        minimumLineSpacing = 0
+        minimumInteritemSpacing = 0
+        // 3.设置滚动方向
+        scrollDirection = .horizontal
+        // 4.设置分页
+        collectionView?.isPagingEnabled = true
+        // 5.回弹
+        collectionView?.bounces = false
+        // 6.去除滚动条
+        collectionView?.showsVerticalScrollIndicator = false
+        collectionView?.showsHorizontalScrollIndicator = false
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

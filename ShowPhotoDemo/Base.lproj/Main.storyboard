@@ -14,7 +14,7 @@
         <scene sceneID="cCF-Gs-yFo">
             <objects>
                 <collectionViewController id="Enx-Av-FA9" customClass="AlbumGridViewController" customModule="ShowPhotoDemo" customModuleProvider="target" sceneMemberID="viewController">
-                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" dataMode="prototypes" id="S2J-Cb-313">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="S2J-Cb-313">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -70,7 +70,7 @@
                     </collectionView>
                     <navigationItem key="navigationItem" title="相片库" id="7aY-vc-ruC"/>
                     <connections>
-                        <segue destination="aeU-Ck-fhv" kind="show" identifier="DetailSegue" id="gD4-kK-R3Q"/>
+                        <segue destination="lkt-iy-MeX" kind="show" identifier="DetailSegue" id="UKL-KM-K3j"/>
                     </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="KHR-e6-fp4" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -78,22 +78,34 @@
             <point key="canvasLocation" x="906.39999999999998" y="150.67466266866569"/>
         </scene>
         <!--Asset Detail View Controller-->
-        <scene sceneID="FaZ-CY-6ex">
+        <scene sceneID="nsu-P3-AIJ">
             <objects>
-                <viewController id="aeU-Ck-fhv" customClass="AssetDetailViewController" customModule="ShowPhotoDemo" customModuleProvider="target" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="8cO-Ip-lvZ"/>
-                        <viewControllerLayoutGuide type="bottom" id="CPI-1P-ju0"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="tpC-IC-nYa">
+                <collectionViewController id="lkt-iy-MeX" customClass="AssetDetailViewController" customModule="ShowPhotoDemo" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" dataMode="prototypes" id="3eK-Wy-kvv">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="MNb-gT-3DK" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                        <collectionViewLayout key="collectionViewLayout" id="8Zf-Fg-XJH" customClass="AssetDetailLayout" customModule="ShowPhotoDemo" customModuleProvider="target"/>
+                        <cells>
+                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="AssetDetailCell" id="3gn-ng-xkK">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </view>
+                                <size key="customSize" width="375" height="603"/>
+                            </collectionViewCell>
+                        </cells>
+                        <connections>
+                            <outlet property="dataSource" destination="lkt-iy-MeX" id="bXc-ut-uUQ"/>
+                            <outlet property="delegate" destination="lkt-iy-MeX" id="H6Y-L4-V4Q"/>
+                        </connections>
+                    </collectionView>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="yW8-CL-pLx" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1711" y="152"/>
+            <point key="canvasLocation" x="1648.8" y="150.67466266866569"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Ol6-Gd-eQd">

@@ -65,37 +65,6 @@ class AlbumGridViewController: UICollectionViewController {
         cell.asset = assetsResults[indexPath.item]
         return cell
     }
-
-    // MARK: UICollectionViewDelegate
-
-    /*
-    // Uncomment this method to specify if the specified item should be highlighted during tracking
-    override func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
-        return true
-    }
-    */
-
-    /*
-    // Uncomment this method to specify if the specified item should be selected
-    override func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-        return true
-    }
-    */
-
-    /*
-    // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
-    override func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
-        return false
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
-        return false
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
-    
-    }
-    */
     
     // 点击选择
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -106,8 +75,8 @@ class AlbumGridViewController: UICollectionViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let identifier = segue.identifier, identifier == detailSegueIdentifier {
             if let destVC = segue.destination as? AssetDetailViewController {
-                let asset = assetsResults[(sender as! IndexPath).item]
-                destVC.asset = asset
+                destVC.assets = assetsResults
+                destVC.index = sender as! IndexPath
             }
         }
     }
@@ -124,7 +93,5 @@ class PhotoCollectionViewFlowLayout: UICollectionViewFlowLayout {
         itemSize = targetSize
         // 背景色
         collectionView?.backgroundColor = UIColor.white
-        // 滚动条
-        collectionView?.showsVerticalScrollIndicator = false
     }
 }

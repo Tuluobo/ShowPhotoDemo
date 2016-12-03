@@ -16,5 +16,7 @@ func HWLog<T>(_ message: T, fileName: String = #file, function: String = #functi
     #endif
 }
 
-let itemWH = UIScreen.main.bounds.width / 4.0 - 1.0
+let screenWidth = UIScreen.main.bounds.width
+let screenHeight = UIScreen.main.bounds.height
+let itemWH = screenWidth / 4.0 - 1.0
 let targetSize = CGSize(width: itemWH, height: itemWH)

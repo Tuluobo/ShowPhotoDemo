@@ -31,16 +31,7 @@ class AlbumGridViewCell: UICollectionViewCell {
         
         switch data.asset.mediaType {
             case .image:
-                if data.assetType == .gif {
-                    tagLabel.isHidden = false
-                    tagLabel.text = "GIF"
-                } else if data.assetType == .photoLive {
-                    tagLabel.isHidden = false
-                    tagLabel.text = "PhotoLive"
-                } else if data.assetType == .burst {
-                    tagLabel.isHidden = false
-                    tagLabel.text = "连拍"
-                }
+                handlerImage(asset: data)
             case .video:
                 playImageView.isHidden = false
                 tagLabel.isHidden = false
@@ -56,5 +47,43 @@ class AlbumGridViewCell: UICollectionViewCell {
             self.thumbImageView.image = image
         }
 
+    }
+    
+    // 图片的处理
+    private func handlerImage(asset: HWAsset) {
+        
+        if asset.assetType != .none {
+            if asset.assetType == .photoLive {
+                tagLabel.isHidden = false
+                tagLabel.text = "PhotoLive"
+            } else if asset.assetType == .burst {
+                tagLabel.isHidden = false
+                tagLabel.text = "连拍"
+            }
+        } else {
+            // 判断普通图片的格式
+            let options = PHImageRequestOptions()
+            options.isNetworkAccessAllowed = false
+            options.isSynchronous = false
+            options.deliveryMode = .fastFormat
+            options.resizeMode = .fast
+            PHImageManager.default().requestImageData(for: asset.asset, options: options) { (data, _, _, _) in
+                guard let imageData = data else { return }
+                if let resType = UIImage.typeForImageData(data: NSData(data: imageData)) {
+                    switch resType {
+                        case "image/jpeg":
+                        asset.assetType = .jpeg
+                        case "image/png":
+                        asset.assetType = .png
+                        case "image/gif":
+                        asset.assetType = .gif
+                        self.tagLabel.isHidden = false
+                        self.tagLabel.text = "GIF"
+                        default: break
+                    }
+                }
+            }
+        }
+        
     }
 }

@@ -41,32 +41,5 @@ class HWAsset {
     init(asset: PHAsset, type: HWAssetType) {
         self.asset = asset
         self.assetType = type
-        if type == .none {
-            reSetType()
-        }
     }
-    
-    // 获取图片的类型，并设置
-    private func reSetType() {
-        let options = PHImageRequestOptions()
-        options.isNetworkAccessAllowed = false
-        options.isSynchronous = true
-        options.deliveryMode = .fastFormat
-        options.resizeMode = .fast
-        PHImageManager.default().requestImageData(for: asset, options: options) { (data, _, _, _) in
-            guard let imageData = data else { return }
-            if let resType = UIImage.typeForImageData(data: NSData(data: imageData)) {
-                switch resType {
-                    case "image/jpeg":
-                        self.assetType = .jpeg
-                    case "image/png":
-                        self.assetType = .png
-                    case "image/gif":
-                        self.assetType = .gif
-                    default: break
-                }
-            }
-        }
-    }
-    
 }
