@@ -7,8 +7,11 @@
 //
 
 import UIKit
+import Photos
 
 class AssetDetailViewController: UIViewController {
+    
+    var asset: HWAsset!
 
     override func viewDidLoad() {
         super.viewDidLoad()

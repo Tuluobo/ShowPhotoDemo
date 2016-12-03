@@ -1,5 +1,5 @@
 //
-//  HWAssetManager.swift
+//  AlbumManager.swift
 //  ShowPhotoDemo
 //
 //  Created by WangHao on 2016/12/3.
@@ -9,11 +9,41 @@
 import Foundation
 import Photos
 
-class HWAssetManager {
+class AlbumManager {
     
-    static let sharedInstance = HWAssetManager()
+    static let sharedInstance = AlbumManager()
     
-    var assets: [HWAsset] {
+    var assets: [HWAsset] = [HWAsset]()
+    
+    // MARK: 私有属性
+    
+    // 全部媒体资源
+    private var assetsResults: PHFetchResult<PHAsset>?
+    // 延时视频
+    private var timelapsesResults: PHFetchResult<PHAsset>?
+    // 慢动作视频
+    private var slomosResults: PHFetchResult<PHAsset>?
+    // 连拍
+    private var burstsResults: PHFetchResult<PHAsset>?
+    // photoLive
+    private var photoLivesResults: PHFetchResult<PHAsset>?
+        
+    func refreshAllData() {
+        assetsResults = getAllAsset()
+        timelapsesResults = getTimelapses()
+        slomosResults = getSlomoVideos()
+        burstsResults = getBursts()
+        photoLivesResults = getPhotoLives()
+        assets = fetchData()
+    }
+    
+    // MARK: 私有方法
+    
+    private init() {
+        refreshAllData()
+    }
+    
+    private func fetchData() -> [HWAsset] {
         var assets = [HWAsset]()
         guard let assetsResults = assetsResults else { return assets }
         for i in 0 ..< assetsResults.count {
@@ -30,9 +60,7 @@ class HWAssetManager {
         return assets
     }
     
-    // MARK: 私有属性
-    // 全部媒体资源
-    private var assetsResults: PHFetchResult<PHAsset>? {
+    private func getAllAsset() -> PHFetchResult<PHAsset>? {
         let albums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumUserLibrary, options: nil)
         if albums.count > 0 {
             let fetchOptions = PHFetchOptions()
@@ -42,36 +70,63 @@ class HWAssetManager {
         return nil
     }
     
-    // 延时视频
-    private var timelapsesResults: PHFetchResult<PHAsset>? {
+    private func getTimelapses() -> PHFetchResult<PHAsset>? {
         let albums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumTimelapses, options: nil)
         if albums.count > 0 {
-            let fetchOptions = PHFetchOptions()
-            fetchOptions.predicate = NSPredicate(format: "mediaType == %d && mediaSubtype == %d", PHAssetMediaType.video.rawValue, PHAssetMediaSubtype.videoTimelapse.rawValue)
-            return PHAsset.fetchAssets(in: albums[0], options: fetchOptions)
+            return PHAsset.fetchAssets(in: albums[0], options: nil)
         }
         return nil
     }
     
-    // 慢动作视频
-    private var slomosResults: PHFetchResult<PHAsset>? {
+    private func getSlomoVideos() -> PHFetchResult<PHAsset>? {
         let albums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumSlomoVideos, options: nil)
         if albums.count > 0 {
+            return PHAsset.fetchAssets(in: albums[0], options: nil)
+        }
+        return nil
+    }
+    
+    private func getBursts() -> PHFetchResult<PHAsset>? {
+        let albums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumBursts, options: nil)
+        if albums.count > 0 {
+            return PHAsset.fetchAssets(in: albums[0], options: nil)
+        }
+        return nil
+    }
+    
+    private func getPhotoLives() -> PHFetchResult<PHAsset>? {
+        let albums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumUserLibrary, options: nil)
+        if albums.count > 0 {
             let fetchOptions = PHFetchOptions()
-            fetchOptions.predicate = NSPredicate(format: "mediaType == %d && mediaType == %d", PHAssetMediaType.video.rawValue, PHAssetMediaSubtype.videoTimelapse.rawValue)
+            fetchOptions.predicate = NSPredicate(format: "mediaType == %d && mediaSubtype == %d", PHAssetMediaType.image.rawValue, PHAssetMediaSubtype.photoLive.rawValue)
             return PHAsset.fetchAssets(in: albums[0], options: fetchOptions)
         }
         return nil
     }
     
-    // MARK: 私有方法
-    
-    private func handlerImage(asset:PHAsset) -> HWAsset {
+    private func handlerImage(asset: PHAsset) -> HWAsset {
+        // photoLive
+        if let photoLives = photoLivesResults, photoLives.contains(asset) {
+            return HWAsset(asset: asset, type: .photoLive)
+        }
+        // 连拍
+        if let bursts = burstsResults, bursts.contains(asset) {
+            return HWAsset(asset: asset, type: .burst)
+        }
+        // 普通照片
         return HWAsset(asset: asset, type: .none)
     }
     
-    private func handlerVideo(asset:PHAsset) -> HWAsset {
-        return HWAsset(asset: asset, type: .none)
+    private func handlerVideo(asset: PHAsset) -> HWAsset {
+        // 慢动作
+        if let slomos = slomosResults, slomos.contains(asset) {
+            return HWAsset(asset: asset, type: .slomo)
+        }
+        // 延时
+        if let timelapses = timelapsesResults, timelapses.contains(asset) {
+            return HWAsset(asset: asset, type: .timeLapse)
+        }
+        return HWAsset(asset: asset, type: .video)
     }
     
 }
