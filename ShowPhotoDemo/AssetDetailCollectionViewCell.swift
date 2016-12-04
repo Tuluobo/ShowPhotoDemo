@@ -119,7 +119,6 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
     @objc private func clickPlay() {
         
         guard let data = asset else { return }
-        
         PHImageManager.default().requestAVAsset(forVideo: data.asset, options: nil, resultHandler: { (asset: AVAsset?, mix: AVAudioMix?, info: [AnyHashable: Any]?) -> Void in
             DispatchQueue.main.async(execute: { () -> Void in
                 if asset != nil {

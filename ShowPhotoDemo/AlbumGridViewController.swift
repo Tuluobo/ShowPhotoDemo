@@ -34,11 +34,9 @@ class AlbumGridViewController: UICollectionViewController {
     
     func refreshData() {
         SVProgressHUD.show(withStatus: "正在获取相册")
-        DispatchQueue.global().async {
-            HWLog("\(Thread.current)")
+        DispatchQueue.global(qos: DispatchQoS.QoSClass.default).async {
             self.assetsResults = AlbumManager.sharedInstance.assets
             DispatchQueue.main.async { () -> Void in
-                HWLog("\(Thread.current)")
                 SVProgressHUD.dismiss()
                 self.collectionView?.reloadData()
             }
