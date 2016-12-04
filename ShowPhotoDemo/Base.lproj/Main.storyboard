@@ -6,6 +6,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -14,48 +15,50 @@
         <scene sceneID="cCF-Gs-yFo">
             <objects>
                 <collectionViewController id="Enx-Av-FA9" customClass="AlbumGridViewController" customModule="ShowPhotoDemo" customModuleProvider="target" sceneMemberID="viewController">
-                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="S2J-Cb-313">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" dataMode="prototypes" id="S2J-Cb-313">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <collectionViewLayout key="collectionViewLayout" id="fze-Y8-PPe" customClass="PhotoCollectionViewFlowLayout" customModule="ShowPhotoDemo" customModuleProvider="target"/>
                         <cells>
                             <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="AlbumGridViewCell" id="Jox-dI-AES" customClass="AlbumGridViewCell" customModule="ShowPhotoDemo" customModuleProvider="target">
-                                <rect key="frame" x="70" y="0.0" width="235" height="256"/>
+                                <rect key="frame" x="0.0" y="0.0" width="173" height="173"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                    <rect key="frame" x="0.0" y="0.0" width="235" height="256"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="173" height="173"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="THt-eN-H3E">
-                                            <rect key="frame" x="0.0" y="0.0" width="239" height="261"/>
-                                        </imageView>
-                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="video-play" translatesAutoresizingMaskIntoConstraints="NO" id="yN6-pX-9KQ">
-                                            <rect key="frame" x="74.5" y="87" width="78" height="85"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="177" height="178"/>
                                         </imageView>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="POp-9r-31J">
-                                            <rect key="frame" x="0.0" y="239" width="235" height="17"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                            <rect key="frame" x="0.0" y="158.5" width="173" height="14.5"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                             <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             <nil key="highlightedColor"/>
                                         </label>
+                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="video-play" translatesAutoresizingMaskIntoConstraints="NO" id="yN6-pX-9KQ">
+                                            <rect key="frame" x="54" y="54" width="65" height="65"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" secondItem="yN6-pX-9KQ" secondAttribute="height" multiplier="1:1" id="x70-Vn-dRs"/>
+                                            </constraints>
+                                        </imageView>
                                     </subviews>
                                 </view>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstItem="POp-9r-31J" firstAttribute="leading" secondItem="Jox-dI-AES" secondAttribute="leading" id="5HP-sE-LoK"/>
-                                    <constraint firstItem="yN6-pX-9KQ" firstAttribute="width" secondItem="Jox-dI-AES" secondAttribute="width" multiplier="1:3" id="8G8-p6-rn8"/>
                                     <constraint firstAttribute="trailing" secondItem="POp-9r-31J" secondAttribute="trailing" id="9MW-av-jlD"/>
+                                    <constraint firstItem="yN6-pX-9KQ" firstAttribute="centerX" secondItem="Jox-dI-AES" secondAttribute="centerX" id="9Nf-Th-oL6"/>
                                     <constraint firstItem="THt-eN-H3E" firstAttribute="leading" secondItem="Jox-dI-AES" secondAttribute="leading" id="9Tr-QU-zhY"/>
                                     <constraint firstAttribute="trailing" secondItem="THt-eN-H3E" secondAttribute="trailing" constant="-4" id="DwD-gP-P7L"/>
                                     <constraint firstAttribute="bottom" secondItem="POp-9r-31J" secondAttribute="bottom" id="EEA-q7-pkh"/>
                                     <constraint firstAttribute="bottom" secondItem="THt-eN-H3E" secondAttribute="bottom" constant="-5" id="MQn-6i-Nry"/>
-                                    <constraint firstItem="yN6-pX-9KQ" firstAttribute="centerY" secondItem="Jox-dI-AES" secondAttribute="centerY" constant="1.5" id="Rq2-Pb-XQH"/>
-                                    <constraint firstItem="yN6-pX-9KQ" firstAttribute="centerX" secondItem="Jox-dI-AES" secondAttribute="centerX" constant="-4" id="mFf-H6-vfl"/>
+                                    <constraint firstItem="yN6-pX-9KQ" firstAttribute="centerY" secondItem="Jox-dI-AES" secondAttribute="centerY" id="bJP-iq-aed"/>
+                                    <constraint firstItem="yN6-pX-9KQ" firstAttribute="width" secondItem="Jox-dI-AES" secondAttribute="width" multiplier="1:3" constant="7.3333333333333357" id="jLM-oD-Fcl"/>
                                     <constraint firstItem="THt-eN-H3E" firstAttribute="top" secondItem="Jox-dI-AES" secondAttribute="top" id="qnU-Ph-Qh8"/>
-                                    <constraint firstItem="yN6-pX-9KQ" firstAttribute="height" secondItem="Jox-dI-AES" secondAttribute="height" multiplier="1:3" id="xqr-MT-22a"/>
                                 </constraints>
-                                <size key="customSize" width="235" height="256"/>
+                                <size key="customSize" width="173" height="173"/>
                                 <connections>
                                     <outlet property="playImageView" destination="yN6-pX-9KQ" id="WlP-AX-7qh"/>
                                     <outlet property="tagLabel" destination="POp-9r-31J" id="sqt-jy-7KY"/>
