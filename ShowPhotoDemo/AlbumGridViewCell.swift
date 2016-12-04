@@ -38,12 +38,7 @@ class AlbumGridViewCell: UICollectionViewCell {
                 tagLabel.text = "视频"
             default: break
         }
-        let options = PHImageRequestOptions()
-        options.isNetworkAccessAllowed = false
-        options.isSynchronous = false
-        options.deliveryMode = .highQualityFormat
-        options.resizeMode = .exact
-        PHImageManager.default().requestImage(for: data.asset, targetSize: kTargetSize, contentMode: .aspectFill, options: options) { (image, info) in
+        PHImageManager.default().requestImage(for: data.asset, targetSize: kTargetSize, contentMode: .aspectFill, options: nil) { (image, info) in
             self.thumbImageView.image = image
         }
 

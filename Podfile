@@ -7,6 +7,7 @@ target 'ShowPhotoDemo' do
 
   # Pods for ShowPhotoDemo
   pod 'SVProgressHUD'
+  pod 'OLImageView'
 
   target 'ShowPhotoDemoTests' do
     inherit! :search_paths

@@ -25,7 +25,18 @@ class AlbumGridViewController: UICollectionViewController {
         // 获取权限
         requestAuth { 
             // 请求数据
-            self.assetsResults = AlbumManager.sharedInstance.assets
+            self.refreshData()
+        }
+        PHPhotoLibrary.shared().register(self)
+    }
+    deinit {
+        PHPhotoLibrary.shared().unregisterChangeObserver(self)
+    }
+    
+    func refreshData() {
+        self.assetsResults = AlbumManager.sharedInstance.assets
+        DispatchQueue.main.async { () -> Void in
+            self.collectionView?.reloadData()
         }
     }
     
@@ -81,6 +92,13 @@ class AlbumGridViewController: UICollectionViewController {
         }
     }
 
+}
+
+// MARK: PHPhotoLibraryChangeObserver
+extension AlbumGridViewController: PHPhotoLibraryChangeObserver {
+    func photoLibraryDidChange(_ changeInstance: PHChange) {
+        HWLog("监听相册变化")
+    }
 }
 
 // MARK: PhotoCollectionViewFlowLayout  流布局
