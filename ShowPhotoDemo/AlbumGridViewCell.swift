@@ -43,7 +43,7 @@ class AlbumGridViewCell: UICollectionViewCell {
         options.isSynchronous = false
         options.deliveryMode = .highQualityFormat
         options.resizeMode = .exact
-        PHImageManager.default().requestImage(for: data.asset, targetSize: targetSize, contentMode: .aspectFill, options: options) { (image, info) in
+        PHImageManager.default().requestImage(for: data.asset, targetSize: kTargetSize, contentMode: .aspectFill, options: options) { (image, info) in
             self.thumbImageView.image = image
         }
 

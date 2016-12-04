@@ -76,7 +76,7 @@ class AlbumGridViewController: UICollectionViewController {
         if let identifier = segue.identifier, identifier == detailSegueIdentifier {
             if let destVC = segue.destination as? AssetDetailViewController {
                 destVC.assets = assetsResults
-                destVC.index = sender as! IndexPath
+                destVC.indexPath = sender as! IndexPath
             }
         }
     }
@@ -90,7 +90,7 @@ class PhotoCollectionViewFlowLayout: UICollectionViewFlowLayout {
         minimumLineSpacing = 1.0
         minimumInteritemSpacing = 1.0
         // Cell Size
-        itemSize = targetSize
+        itemSize = kTargetSize
         // 背景色
         collectionView?.backgroundColor = UIColor.white
     }

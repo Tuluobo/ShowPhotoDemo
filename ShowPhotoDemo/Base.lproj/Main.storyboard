@@ -70,7 +70,7 @@
                     </collectionView>
                     <navigationItem key="navigationItem" title="相片库" id="7aY-vc-ruC"/>
                     <connections>
-                        <segue destination="lkt-iy-MeX" kind="show" identifier="DetailSegue" id="UKL-KM-K3j"/>
+                        <segue destination="eYt-bZ-Eop" kind="presentation" identifier="DetailSegue" modalTransitionStyle="crossDissolve" id="Vnz-kk-ZE0"/>
                     </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="KHR-e6-fp4" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -78,34 +78,22 @@
             <point key="canvasLocation" x="906.39999999999998" y="150.67466266866569"/>
         </scene>
         <!--Asset Detail View Controller-->
-        <scene sceneID="nsu-P3-AIJ">
+        <scene sceneID="7fh-Jn-NoD">
             <objects>
-                <collectionViewController id="lkt-iy-MeX" customClass="AssetDetailViewController" customModule="ShowPhotoDemo" customModuleProvider="target" sceneMemberID="viewController">
-                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" dataMode="prototypes" id="3eK-Wy-kvv">
+                <viewController id="eYt-bZ-Eop" customClass="AssetDetailViewController" customModule="ShowPhotoDemo" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="dT0-A8-Fai"/>
+                        <viewControllerLayoutGuide type="bottom" id="3Xs-dV-uNS"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="3cQ-Cn-zmQ">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <collectionViewLayout key="collectionViewLayout" id="8Zf-Fg-XJH" customClass="AssetDetailLayout" customModule="ShowPhotoDemo" customModuleProvider="target"/>
-                        <cells>
-                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="AssetDetailCell" id="3gn-ng-xkK">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </view>
-                                <size key="customSize" width="375" height="603"/>
-                            </collectionViewCell>
-                        </cells>
-                        <connections>
-                            <outlet property="dataSource" destination="lkt-iy-MeX" id="bXc-ut-uUQ"/>
-                            <outlet property="delegate" destination="lkt-iy-MeX" id="H6Y-L4-V4Q"/>
-                        </connections>
-                    </collectionView>
-                </collectionViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="yW8-CL-pLx" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Zhs-Mg-hNz" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1648.8" y="150.67466266866569"/>
+            <point key="canvasLocation" x="1666" y="151"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Ol6-Gd-eQd">
