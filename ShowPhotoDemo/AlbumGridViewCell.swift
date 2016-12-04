@@ -31,54 +31,30 @@ class AlbumGridViewCell: UICollectionViewCell {
         
         switch data.asset.mediaType {
             case .image:
-                handlerImage(asset: data)
+                if data.assetType == .photoLive {
+                    tagLabel.isHidden = false
+                    tagLabel.text = "PhotoLive"
+                } else if data.assetType == .burst {
+                    tagLabel.isHidden = false
+                    tagLabel.text = "连拍"
+                } else if data.assetType == .gif {
+                    tagLabel.isHidden = false
+                    tagLabel.text = "GIF"
+                }
             case .video:
                 playImageView.isHidden = false
                 tagLabel.isHidden = false
                 tagLabel.text = "视频"
+                if data.assetType == .slomo {
+                    tagLabel.text = "慢动作"
+                } else if data.assetType == .timeLapse {
+                    tagLabel.text = "延时"
+                }
             default: break
         }
+        
         PHImageManager.default().requestImage(for: data.asset, targetSize: kTargetSize, contentMode: .aspectFill, options: nil) { (image, info) in
             self.thumbImageView.image = image
         }
-
-    }
-    
-    // 图片的处理
-    private func handlerImage(asset: HWAsset) {
-        
-        if asset.assetType != .none {
-            if asset.assetType == .photoLive {
-                tagLabel.isHidden = false
-                tagLabel.text = "PhotoLive"
-            } else if asset.assetType == .burst {
-                tagLabel.isHidden = false
-                tagLabel.text = "连拍"
-            }
-        } else {
-            // 判断普通图片的格式
-            let options = PHImageRequestOptions()
-            options.isNetworkAccessAllowed = false
-            options.isSynchronous = false
-            options.deliveryMode = .fastFormat
-            options.resizeMode = .fast
-            PHImageManager.default().requestImageData(for: asset.asset, options: options) { (data, _, _, _) in
-                guard let imageData = data else { return }
-                if let resType = UIImage.typeForImageData(data: NSData(data: imageData)) {
-                    switch resType {
-                        case "image/jpeg":
-                        asset.assetType = .jpeg
-                        case "image/png":
-                        asset.assetType = .png
-                        case "image/gif":
-                        asset.assetType = .gif
-                        self.tagLabel.isHidden = false
-                        self.tagLabel.text = "GIF"
-                        default: break
-                    }
-                }
-            }
-        }
-        
     }
 }

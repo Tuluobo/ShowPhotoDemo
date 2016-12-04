@@ -24,9 +24,10 @@ enum HWAssetType: Int {
     case png
     case gif
     case photoLive
+    case burst      ///> 连拍
+    
     case video
     case timeLapse  ///> 延时拍摄
-    case burst      ///> 连拍
     case slomo      ///> 慢动作
 }
 

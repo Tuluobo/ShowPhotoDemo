@@ -15,11 +15,10 @@ private let detailSegueIdentifier = "DetailSegue"
 
 class AlbumGridViewController: UICollectionViewController {
     
-    // MARK: 懒加载
-    
     // MARK: 普通变量
+    /// 数据源
     private var assetsResults = [HWAsset]()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // 获取权限
@@ -34,9 +33,16 @@ class AlbumGridViewController: UICollectionViewController {
     }
     
     func refreshData() {
-        self.assetsResults = AlbumManager.sharedInstance.assets
-        DispatchQueue.main.async { () -> Void in
-            self.collectionView?.reloadData()
+        SVProgressHUD.show(withStatus: "正在获取相册")
+        DispatchQueue.global().async {
+            HWLog("\(Thread.current)")
+            self.assetsResults = AlbumManager.sharedInstance.assets
+            DispatchQueue.main.async { () -> Void in
+                HWLog("\(Thread.current)")
+                SVProgressHUD.dismiss()
+                self.collectionView?.reloadData()
+            }
+
         }
     }
     

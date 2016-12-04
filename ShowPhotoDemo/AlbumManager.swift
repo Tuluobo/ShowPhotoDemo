@@ -16,16 +16,20 @@ class AlbumManager {
     var assets: [HWAsset] = [HWAsset]()
     
     // MARK: 私有属性
-    
-    // 全部媒体资源
+    /// 缓存管理类
+    lazy private var cacheIManager: PHCachingImageManager = {
+        let manager = PHCachingImageManager()
+        return manager
+    }()
+    /// 全部媒体资源
     private var assetsResults: PHFetchResult<PHAsset>?
-    // 延时视频
+    /// 延时视频
     private var timelapsesResults: PHFetchResult<PHAsset>?
-    // 慢动作视频
+    /// 慢动作视频
     private var slomosResults: PHFetchResult<PHAsset>?
-    // 连拍
+    /// 连拍
     private var burstsResults: PHFetchResult<PHAsset>?
-    // photoLive
+    /// photoLive
     private var photoLivesResults: PHFetchResult<PHAsset>?
         
     func refreshAllData() {
@@ -48,9 +52,14 @@ class AlbumManager {
         guard let assetsResults = assetsResults else { return assets }
         for i in 0 ..< assetsResults.count {
             let asset = assetsResults[i]
+            cacheIManager.startCachingImages(for: [asset], targetSize: kTargetSize, contentMode: .aspectFit, options: nil)
             switch asset.mediaType {
             case .image:
-                assets.append(handlerImage(asset: asset))
+                let handlerAsset = handlerImage(asset: asset)
+                if handlerAsset.assetType == .none {
+                    reSetType(asset: handlerAsset)
+                }
+                assets.append(handlerAsset)
             case .video:
                 assets.append(handlerVideo(asset: asset))
             default:
@@ -115,6 +124,31 @@ class AlbumManager {
         }
         // 普通照片
         return HWAsset(asset: asset, type: .none)
+    }
+    
+    // 普通图片的处理
+    private func reSetType(asset: HWAsset) {
+        
+        let options = PHImageRequestOptions()
+        options.isNetworkAccessAllowed = false
+        options.isSynchronous = true
+        options.deliveryMode = .fastFormat
+        
+        PHImageManager.default().requestImageData(for: asset.asset, options: options, resultHandler: {(data, str, ori, info) in
+            
+            guard let data = data else { return }
+            if let resType = UIImage.typeForImageData(data: NSData(data: data)) {
+                switch resType {
+                case "image/jpeg":
+                    asset.assetType = .jpeg
+                case "image/png":
+                    asset.assetType = .png
+                case "image/gif":
+                    asset.assetType = .gif
+                default: break
+                }
+            }
+        })
     }
     
     private func handlerVideo(asset: PHAsset) -> HWAsset {
