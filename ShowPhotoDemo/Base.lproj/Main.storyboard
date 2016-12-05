@@ -20,7 +20,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="albumTableViewCell" textLabel="5lW-gR-4SF" detailTextLabel="U91-HB-Ydg" style="IBUITableViewCellStyleSubtitle" id="4x0-kg-I11">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="kAlbumTableViewCell" textLabel="5lW-gR-4SF" detailTextLabel="U91-HB-Ydg" style="IBUITableViewCellStyleSubtitle" id="4x0-kg-I11">
                                 <rect key="frame" x="0.0" y="56" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="4x0-kg-I11" id="QKi-HQ-ury">
@@ -65,7 +65,7 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <collectionViewLayout key="collectionViewLayout" id="fze-Y8-PPe" customClass="PhotoCollectionViewFlowLayout" customModule="ShowPhotoDemo" customModuleProvider="target"/>
                         <cells>
-                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="AlbumGridViewCell" id="Jox-dI-AES" customClass="AlbumGridViewCell" customModule="ShowPhotoDemo" customModuleProvider="target">
+                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="kAlbumGridViewCell" id="Jox-dI-AES" customClass="AlbumGridViewCell" customModule="ShowPhotoDemo" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="173" height="173"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -118,12 +118,12 @@
                     <navigationItem key="navigationItem" title="相片库" id="7aY-vc-ruC">
                         <barButtonItem key="leftBarButtonItem" title="相簿" id="Snx-as-Yzx">
                             <connections>
-                                <segue destination="cHn-3D-JxY" kind="show" identifier="CollectionSegue" id="Dea-zv-3L3"/>
+                                <segue destination="cHn-3D-JxY" kind="show" identifier="kAlbumTableViewSegue" id="Dea-zv-3L3"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <segue destination="eYt-bZ-Eop" kind="presentation" identifier="DetailSegue" modalTransitionStyle="crossDissolve" id="Vnz-kk-ZE0"/>
+                        <segue destination="eYt-bZ-Eop" kind="presentation" identifier="kAssetDetailViewSegue" modalTransitionStyle="crossDissolve" id="Vnz-kk-ZE0"/>
                     </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="KHR-e6-fp4" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -146,7 +146,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Zhs-Mg-hNz" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1666" y="151"/>
+            <point key="canvasLocation" x="1650" y="151"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Ol6-Gd-eQd">

@@ -22,3 +22,11 @@ let kScreenWidth = kScreenBounds.size.width
 let kScreenHeight = kScreenBounds.size.height
 let kItemWH = kScreenWidth / 4.0 - 1.0
 let kTargetSize = CGSize(width: kItemWH, height: kItemWH)
+
+// Identifier
+let kAlbumTableViewCell = "kAlbumTableViewCell"
+let kAlbumGridViewCell = "kAlbumGridViewCell"
+let kAssetDetailViewSegue = "kAssetDetailViewSegue"
+let kAlbumTableViewSegue = "kAlbumTableViewSegue"
+let kAssetDetailViewCell = "kAssetDetailViewCell"
+let kBurstsViewCell = "kBurstsViewCell"

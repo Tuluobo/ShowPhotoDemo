@@ -11,10 +11,14 @@ import Photos
 
 class AlbumGridViewCell: UICollectionViewCell {
     
+    /// 主缩略图
     @IBOutlet weak var thumbImageView: UIImageView!
+    /// Video上的播放图标
     @IBOutlet weak var playImageView: UIImageView!
+    /// Tag 信息
     @IBOutlet weak var tagLabel: UILabel!
     
+    /// 数据源
     var asset: PHAsset? {
         didSet {
             updateUI()
@@ -28,7 +32,6 @@ class AlbumGridViewCell: UICollectionViewCell {
         tagLabel.isHidden = true
         
         guard let asset = asset else { return }
-        
         switch asset.mediaType {
             case .image:
                 if let type = AlbumManager.sharedInstance.getType(asset: asset) {
@@ -43,7 +46,6 @@ class AlbumGridViewCell: UICollectionViewCell {
             }
             default: break
         }
-        
         PHImageManager.default().requestImage(for: asset, targetSize: kTargetSize, contentMode: .aspectFill, options: nil) { (image, info) in
             self.thumbImageView.image = image
         }

@@ -9,10 +9,9 @@
 import UIKit
 import Photos
 
-private let reuseIdentifier = "BurstCollectionViewCell"
-
 class BurstsViewController: UICollectionViewController {
     
+    /// 连拍图片的数据源
     var assets: PHFetchResult<PHAsset>?
 
     override func viewDidLoad() {
@@ -26,7 +25,7 @@ class BurstsViewController: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! BurstCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: kBurstsViewCell, for: indexPath) as! BurstCollectionViewCell
         cell.asset = assets![indexPath.item]
         return cell
     }

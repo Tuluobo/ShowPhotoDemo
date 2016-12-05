@@ -9,8 +9,6 @@
 import UIKit
 import Photos
 
-private let assetDetailCell = "AssetDetailCell"
-
 class AssetDetailViewController: UIViewController {
     
     // MARK: 数据源
@@ -18,7 +16,8 @@ class AssetDetailViewController: UIViewController {
     fileprivate var assetsResults: PHFetchResult<PHAsset>!
     var indexPath: IndexPath!
     
-    fileprivate var isSelecting = false
+    /// 对于连拍照片的是否正在展示标记
+    fileprivate var isShowing = false
     
     // MARK: 懒加载
     /// CollectionView
@@ -26,8 +25,24 @@ class AssetDetailViewController: UIViewController {
         let clv = UICollectionView(frame: kScreenBounds, collectionViewLayout: AssetDetailLayout())
         clv.delegate = self
         clv.dataSource = self
-        clv.register(AssetDetailCollectionViewCell.self, forCellWithReuseIdentifier: assetDetailCell)
+        clv.register(AssetDetailCollectionViewCell.self, forCellWithReuseIdentifier: kAssetDetailViewCell)
         return clv
+    }()
+    /// 返回按钮
+    fileprivate lazy var closeBtn: UIButton = {
+        let frame = CGRect(x: 16, y: 28, width: 32, height: 32)
+        let btn = UIButton(frame: frame)
+        btn.setImage(UIImage(named: "back"), for: .normal)
+        btn.addTarget(self, action: #selector(closeController), for: .touchUpInside)
+        return btn
+    }()
+    /// 删除按钮
+    fileprivate lazy var deleteBtn: UIButton = {
+        let frame = CGRect(x: kScreenWidth - (16+32), y: 28, width: 32, height: 32)
+        let btn = UIButton(frame: frame)
+        btn.setImage(UIImage(named: "delete"), for: .normal)
+        btn.addTarget(self, action: #selector(deleteThisAsset), for: .touchUpInside)
+        return btn
     }()
     /// 连拍视图
     fileprivate lazy var burstsViewController: BurstsViewController = {
@@ -47,13 +62,25 @@ class AssetDetailViewController: UIViewController {
         return btn
     }()
     
+    /// 状态栏字体显示为白色
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
+        // 添加子视图 CollectionView
+        self.view.addSubview(collectionView)
+        // 去除自动调整 Scrollview
+        automaticallyAdjustsScrollViewInsets = false
+        // 关闭按钮
+        self.view.addSubview(closeBtn)
+        // 删除按钮
+        self.view.addSubview(deleteBtn)
+        // 控制区
+        view.addSubview(controlView)
+        // 选择按钮
+        controlView.addSubview(selectBtn)
         // 相册的监听
         PHPhotoLibrary.shared().register(self)
     }
@@ -61,34 +88,10 @@ class AssetDetailViewController: UIViewController {
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
     
-    private func setupUI() {
-        // 添加子视图 CollectionView
-        self.view.addSubview(collectionView)
-        // 去除自动调整 Scrollview
-        automaticallyAdjustsScrollViewInsets = false
-        // 关闭按钮
-        let closeBtnFrame = CGRect(x: 16, y: 28, width: 32, height: 32)
-        let closeBtn = UIButton(frame: closeBtnFrame)
-        closeBtn.setImage(UIImage(named: "back"), for: .normal)
-        self.view.addSubview(closeBtn)
-        closeBtn.addTarget(self, action: #selector(closeController), for: .touchUpInside)
-        // 删除按钮
-        let deleteBtnFrame = CGRect(x: kScreenWidth - (16+32), y: 28, width: 32, height: 32)
-        let deleteBtn = UIButton(frame: deleteBtnFrame)
-        deleteBtn.setImage(UIImage(named: "delete"), for: .normal)
-        self.view.addSubview(deleteBtn)
-        deleteBtn.addTarget(self, action: #selector(deleteThisAsset), for: .touchUpInside)
-        // 控制区
-        view.addSubview(controlView)
-        // 选择按钮
-        controlView.addSubview(selectBtn)
-    }
-    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         // 获取权限
         AlbumManager.requestAuth {
-            // 请求数据
             self.refreshData()
         }
     }
@@ -120,11 +123,11 @@ class AssetDetailViewController: UIViewController {
     
     /// 选择连拍照片
     @objc private func clickControlSelectBtn() {
-        if isSelecting {
+        if isShowing {
             burstsViewController.view.removeFromSuperview()
             burstsViewController.removeFromParentViewController()
             selectBtn.setTitle("查看连拍", for: .normal)
-            isSelecting = false
+            isShowing = false
         } else{
             if let indexPath = collectionView.indexPathsForVisibleItems.last, let identifier = assetsResults[indexPath.item].burstIdentifier {
                 
@@ -136,7 +139,7 @@ class AssetDetailViewController: UIViewController {
                 burstsViewController.assets = assets
                 burstsViewController.collectionView?.reloadData()
                 selectBtn.setTitle("完成", for: .normal)
-                isSelecting = true
+                isShowing = true
             }
         }
     }
@@ -150,13 +153,13 @@ extension AssetDetailViewController: UICollectionViewDelegate, UICollectionViewD
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: assetDetailCell, for: indexPath) as! AssetDetailCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: kAssetDetailViewCell, for: indexPath) as! AssetDetailCollectionViewCell
         cell.asset = assetsResults[indexPath.item]
         return cell
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        isSelecting = false
+        isShowing = false
         if let indexPath = collectionView.indexPathsForVisibleItems.last {
             controlView.isHidden = !assetsResults[indexPath.item].representsBurst
         }
@@ -196,6 +199,7 @@ extension AssetDetailViewController: PHPhotoLibraryChangeObserver {
         }
     }
     
+    /// 将IndexSet 转 [IndexPath]
     private func indexPathsFromIndexSet(indexSet: IndexSet) -> [IndexPath] {
         var indexPaths = [IndexPath]()
         for index in indexSet {

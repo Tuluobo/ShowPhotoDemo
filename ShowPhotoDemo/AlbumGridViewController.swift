@@ -9,16 +9,11 @@
 import UIKit
 import Photos
 
-private let reuseIdentifier = "AlbumGridViewCell"
-private let detailSegueIdentifier = "DetailSegue"
-private let assetCollectionSegue = "CollectionSegue"
-
 class AlbumGridViewController: UICollectionViewController {
     
-    // MARK: 普通变量
-    /// 数据源
     /// 相册
     var assetCollection: PHAssetCollection?
+    /// 数据源
     fileprivate var assetsResults: PHFetchResult<PHAsset>!
     
     override func viewDidLoad() {
@@ -46,33 +41,33 @@ class AlbumGridViewController: UICollectionViewController {
     }
     
     // MARK: UICollectionViewDataSource
-    
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return assetsResults.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
 
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! AlbumGridViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: kAlbumGridViewCell, for: indexPath) as! AlbumGridViewCell
         cell.asset = assetsResults[indexPath.item]
         return cell
     }
     
-    // 点击选择
+    /// 点击显示大图
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        performSegue(withIdentifier: detailSegueIdentifier, sender: indexPath)
+        performSegue(withIdentifier: kAssetDetailViewSegue, sender: indexPath)
     }
     
-    // 通过 Segue 展示 Detail Page
+    /// 通过 Segue 跳转
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let identifier = segue.identifier, identifier == detailSegueIdentifier {
+        // 显示大图
+        if let identifier = segue.identifier, identifier == kAssetDetailViewSegue {
             if let destVC = segue.destination as? AssetDetailViewController {
                 destVC.assetCollection = assetCollection
                 destVC.indexPath = sender as! IndexPath
             }
         }
-        
-        if let identifier = segue.identifier, identifier == assetCollectionSegue {
+        // 相簿
+        if let identifier = segue.identifier, identifier == kAlbumTableViewSegue {
             if let destVC = segue.destination as? AlbumTableViewController {
                 destVC.presentViewController = self
             }

@@ -11,8 +11,10 @@ import Photos
 
 class BurstCollectionViewCell: UICollectionViewCell {
     
+    /// 连拍图片视图
     @IBOutlet weak var assetImageView: UIImageView!
     
+    /// 数据源
     var asset: PHAsset? {
         didSet {
             updateUI()
@@ -20,25 +22,15 @@ class BurstCollectionViewCell: UICollectionViewCell {
     }
     
     private func updateUI() {
+        // 初始化
         assetImageView.image = nil
         
         guard let asset = asset else { return }
-        
         PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFit, options: nil, resultHandler: { (image, info) in
-            self.assetImageView.frame = self.resetFrame(size: image?.size ?? CGSize.zero)
+            guard let image = image else { return }
+            let newHeight = kScreenWidth / (image.size.width / image.size.height)
+            self.assetImageView.frame = CGRect(x: 0, y: (kScreenHeight - newHeight) / 2, width: kScreenWidth, height: newHeight)
             self.assetImageView.image = image
         })
-        
     }
-    
-    /// 计算图像的Frame
-    fileprivate func resetFrame(size: CGSize) -> CGRect {
-        // 调整
-        let scale = size.width / size.height
-        let newHeight = kScreenWidth / scale
-        let x: CGFloat = 0.0
-        let y = (kScreenHeight - newHeight) / 2
-        return CGRect(x: x, y: y, width: kScreenWidth, height: newHeight)
-    }
-    
 }

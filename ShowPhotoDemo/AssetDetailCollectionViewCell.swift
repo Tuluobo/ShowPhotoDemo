@@ -11,44 +11,49 @@ import Photos
 import PhotosUI
 import OLImageView.OLImage
 
-protocol AssetDetailCollectionViewCellDelegate: NSObjectProtocol {
-    func showBurstsView(cell: AssetDetailCollectionViewCell, isSelecting: Bool)
-}
-
 class AssetDetailCollectionViewCell: UICollectionViewCell {
     
-    // 数据源
+    /// 数据源
     var asset: PHAsset? {
         didSet {
             updateUI()
         }
     }
-    weak var delegate: AssetDetailCollectionViewCellDelegate?
+    /// 视频播放状态
     private var isPlaying = false
     
     // MARK: 懒加载
+    /// 图片的Scroll容器
     fileprivate lazy var scrollView: UIScrollView = {
         let sv = UIScrollView()
         sv.delegate = self
         sv.maximumZoomScale = 3.0
         return sv
     }()
+    /// 图片的视图
+    fileprivate lazy var assetImageView: UIImageView = UIImageView()
+    /// LivePhoto
+    fileprivate lazy var assetPhotoLiveView: PHLivePhotoView = PHLivePhotoView()
+    /// 播放按钮
     fileprivate lazy var videoPlayBtn: UIButton = {
         let width = kScreenWidth / 3.0
         let frame = CGRect(x: (kScreenWidth-width) / 2.0, y: (kScreenHeight-width) / 2.0, width: width, height: width)
         let btn = UIButton(frame: frame)
         btn.setImage(UIImage(named: "video-play"), for: .normal)
+        btn.addTarget(self, action: #selector(clickControlPlayBtn), for: .touchUpInside)
         return btn
     }()
-    fileprivate lazy var assetImageView: UIImageView = UIImageView()
-    fileprivate lazy var assetPhotoLiveView: PHLivePhotoView = PHLivePhotoView()
+    /// 播放器
     fileprivate lazy var player: AVPlayer = AVPlayer()
+    /// 播放图层
     fileprivate lazy var playerLayer: AVPlayerLayer = AVPlayerLayer()
+    /// 控制区容器
     fileprivate lazy var controlView: UIView = {
         let view = UIView(frame: CGRect(x: 0, y: kScreenHeight - 44, width: kScreenWidth, height: 44))
         view.backgroundColor = UIColor(white: 0.15, alpha: 0.5)
         return view
     }()
+    /// 播放控制按钮
     fileprivate lazy var controlPlayBtn: UIButton = {
         let btn = UIButton(frame: CGRect(x: (kScreenWidth - 32) / 2.0, y: 6, width: 32, height: 32))
         btn.addTarget(self, action: #selector(clickControlPlayBtn), for: .touchUpInside)
@@ -56,7 +61,6 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
     }()
     
     // MARK: 生命周期方法
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -76,7 +80,6 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
         contentView.layer.addSublayer(playerLayer)
         // 播放按钮
         contentView.addSubview(videoPlayBtn)
-        videoPlayBtn.addTarget(self, action: #selector(clickControlPlayBtn), for: .touchUpInside)
         // 控制区
         contentView.addSubview(controlView)
         controlView.addSubview(controlPlayBtn)
@@ -180,9 +183,7 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
 
 // MARK: - UIScrollViewDelegate
 extension AssetDetailCollectionViewCell: UIScrollViewDelegate {
-    /**
-     *  返回一个scrollView的子控件进行缩放
-     */
+    /// 返回一个scrollView的子控件进行缩放
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         if !self.assetImageView.isHidden {
             return self.assetImageView
@@ -193,7 +194,7 @@ extension AssetDetailCollectionViewCell: UIScrollViewDelegate {
         return nil
     }
     
-    // 让图片居中
+    /// 图片居中
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
         let offsetX = (scrollView.bounds.size.width > scrollView.contentSize.width) ? (scrollView.bounds.size.width - scrollView.contentSize.width) * 0.5 : 0.0
         let offsetY = (scrollView.bounds.size.height > scrollView.contentSize.height) ? (scrollView.bounds.size.height - scrollView.contentSize.height) * 0.5 : 0.0

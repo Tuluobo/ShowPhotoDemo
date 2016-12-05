@@ -20,7 +20,7 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <collectionViewLayout key="collectionViewLayout" id="TAJ-w9-ayh" customClass="BurstsViewLayout" customModule="ShowPhotoDemo" customModuleProvider="target"/>
                         <cells>
-                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="BurstCollectionViewCell" id="rza-QP-kl3" customClass="BurstCollectionViewCell" customModule="ShowPhotoDemo" customModuleProvider="target">
+                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="kBurstsViewCell" id="rza-QP-kl3" customClass="BurstCollectionViewCell" customModule="ShowPhotoDemo" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="376" height="669"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -53,7 +53,7 @@
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7kh-l6-BuS" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-114.40000000000001" y="161.46926536731635"/>
+            <point key="canvasLocation" x="-212" y="173"/>
         </scene>
     </scenes>
 </document>

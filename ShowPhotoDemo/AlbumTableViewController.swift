@@ -9,24 +9,25 @@
 import UIKit
 import Photos
 
-let albumTableViewCell = "albumTableViewCell"
-
 class AlbumTableViewController: UITableViewController {
 
+    /// 父级控制器
     var presentViewController: AlbumGridViewController!
+    /// 数据源
     var assetCollecitons = [PHFetchResult<PHAssetCollection>]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // 注册监听
         PHPhotoLibrary.shared().register(self)
+        // 刷新数据
         refreshData()
     }
     deinit {
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
     
-    func refreshData() {
+    fileprivate func refreshData() {
         assetCollecitons.append(AlbumManager.sharedInstance.getAssetCollections())
         assetCollecitons.append(PHAssetCollection.fetchTopLevelUserCollections(with: nil) as! PHFetchResult<PHAssetCollection>)
         tableView.reloadData()
@@ -47,7 +48,6 @@ class AlbumTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
         return assetCollecitons[section].count
     }
 
@@ -56,7 +56,7 @@ class AlbumTableViewController: UITableViewController {
         let collection = assetCollecitons[indexPath.section][indexPath.item]
         let phAssetFetchResult = PHAsset.fetchAssets(in: collection, options: nil)
         // cell
-        let cell = tableView.dequeueReusableCell(withIdentifier: albumTableViewCell, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: kAlbumTableViewCell, for: indexPath)
         cell.textLabel?.text = collection.localizedTitle
         cell.detailTextLabel?.text = "\(phAssetFetchResult.count)"
         return cell
