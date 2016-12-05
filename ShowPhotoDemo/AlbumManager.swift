@@ -8,12 +8,19 @@
 
 import Foundation
 import Photos
+import SVProgressHUD
+
+protocol AlbumManagerDelegate {
+    func albumChanger()
+}
 
 class AlbumManager {
     
     static let sharedInstance = AlbumManager()
     
-    var assets: [HWAsset] = [HWAsset]()
+    var assets: [HWAsset]! {
+        return fetchData()
+    }
     
     // MARK: 私有属性
     /// 缓存管理类
@@ -31,23 +38,35 @@ class AlbumManager {
     private var burstsResults: PHFetchResult<PHAsset>?
     /// photoLive
     private var photoLivesResults: PHFetchResult<PHAsset>?
-        
-    func refreshAllData() {
+    
+    /// 请求权限
+    class func requestAuth(completed:(()->Void)?) {
+        switch PHPhotoLibrary.authorizationStatus() {
+        case .authorized:
+            completed?()
+        case .denied:
+            SVProgressHUD.showError(withStatus: "需要在设置中开启相册权限")
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization({ (status) in
+                if status == .authorized {
+                    completed?()
+                } else {
+                    SVProgressHUD.showError(withStatus: "相册访问失败")
+                }
+            })
+        case .restricted:
+            SVProgressHUD.showError(withStatus: "系统不允许用户访问相册")
+        }
+    }
+
+    // MARK: 私有方法
+    /// 计算数据源
+    private func fetchData() -> [HWAsset] {
         assetsResults = getAllAsset()
         timelapsesResults = getTimelapses()
         slomosResults = getSlomoVideos()
         burstsResults = getBursts()
         photoLivesResults = getPhotoLives()
-        assets = fetchData()
-    }
-    
-    // MARK: 私有方法
-    
-    private init() {
-        refreshAllData()
-    }
-    
-    private func fetchData() -> [HWAsset] {
         var assets = [HWAsset]()
         guard let assetsResults = assetsResults else { return assets }
         for i in 0 ..< assetsResults.count {
@@ -55,11 +74,7 @@ class AlbumManager {
             cacheIManager.startCachingImages(for: [asset], targetSize: kTargetSize, contentMode: .aspectFit, options: nil)
             switch asset.mediaType {
             case .image:
-                let handlerAsset = handlerImage(asset: asset)
-                if handlerAsset.assetType == .none {
-                    reSetType(asset: handlerAsset)
-                }
-                assets.append(handlerAsset)
+                assets.append(handlerImage(asset: asset))
             case .video:
                 assets.append(handlerVideo(asset: asset))
             default:
@@ -124,31 +139,6 @@ class AlbumManager {
         }
         // 普通照片
         return HWAsset(asset: asset, type: .none)
-    }
-    
-    // 普通图片的处理
-    private func reSetType(asset: HWAsset) {
-        
-        let options = PHImageRequestOptions()
-        options.isNetworkAccessAllowed = false
-        options.isSynchronous = true
-        options.deliveryMode = .fastFormat
-        
-        PHImageManager.default().requestImageData(for: asset.asset, options: options, resultHandler: {(data, str, ori, info) in
-            
-            guard let data = data else { return }
-            if let resType = UIImage.typeForImageData(data: NSData(data: data)) {
-                switch resType {
-                case "image/jpeg":
-                    asset.assetType = .jpeg
-                case "image/png":
-                    asset.assetType = .png
-                case "image/gif":
-                    asset.assetType = .gif
-                default: break
-                }
-            }
-        })
     }
     
     private func handlerVideo(asset: PHAsset) -> HWAsset {

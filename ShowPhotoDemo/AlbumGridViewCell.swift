@@ -37,9 +37,6 @@ class AlbumGridViewCell: UICollectionViewCell {
                 } else if data.assetType == .burst {
                     tagLabel.isHidden = false
                     tagLabel.text = "连拍"
-                } else if data.assetType == .gif {
-                    tagLabel.isHidden = false
-                    tagLabel.text = "GIF"
                 }
             case .video:
                 playImageView.isHidden = false

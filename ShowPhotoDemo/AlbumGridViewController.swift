@@ -8,7 +8,6 @@
 
 import UIKit
 import Photos
-import SVProgressHUD
 
 private let reuseIdentifier = "AlbumGridViewCell"
 private let detailSegueIdentifier = "DetailSegue"
@@ -22,7 +21,7 @@ class AlbumGridViewController: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // 获取权限
-        requestAuth { 
+        AlbumManager.requestAuth {
             // 请求数据
             self.refreshData()
         }
@@ -32,38 +31,15 @@ class AlbumGridViewController: UICollectionViewController {
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
     
+    /// 刷新数据
     func refreshData() {
-        SVProgressHUD.show(withStatus: "正在获取相册")
-        DispatchQueue.global(qos: DispatchQoS.QoSClass.default).async {
-            self.assetsResults = AlbumManager.sharedInstance.assets
-            DispatchQueue.main.async { () -> Void in
-                SVProgressHUD.dismiss()
-                self.collectionView?.reloadData()
-            }
-
+        self.assetsResults = AlbumManager.sharedInstance.assets
+        DispatchQueue.main.async { () -> Void in
+            self.collectionView?.reloadData()
+            self.collectionView?.scrollToItem(at: IndexPath(row: self.assetsResults.count-1, section: 0), at: .bottom, animated: false)
         }
     }
     
-    /// 请求权限
-    private func requestAuth(completed:(()->Void)?) {
-        switch PHPhotoLibrary.authorizationStatus() {
-        case .authorized:
-            completed?()
-        case .denied:
-            SVProgressHUD.showError(withStatus: "需要在设置中开启相册权限")
-        case .notDetermined:
-            PHPhotoLibrary.requestAuthorization({ (status) in
-                if status == .authorized {
-                    completed?()
-                } else {
-                    SVProgressHUD.showError(withStatus: "相册访问失败")
-                }
-            })
-        case .restricted:
-            SVProgressHUD.showError(withStatus: "系统不允许用户访问相册")
-        }
-    }
-
     // MARK: UICollectionViewDataSource
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -95,15 +71,8 @@ class AlbumGridViewController: UICollectionViewController {
             }
         }
     }
-
 }
 
-// MARK: PHPhotoLibraryChangeObserver
-extension AlbumGridViewController: PHPhotoLibraryChangeObserver {
-    func photoLibraryDidChange(_ changeInstance: PHChange) {
-        HWLog("监听相册变化")
-    }
-}
 
 // MARK: PhotoCollectionViewFlowLayout  流布局
 class PhotoCollectionViewFlowLayout: UICollectionViewFlowLayout {
@@ -115,5 +84,12 @@ class PhotoCollectionViewFlowLayout: UICollectionViewFlowLayout {
         itemSize = kTargetSize
         // 背景色
         collectionView?.backgroundColor = UIColor.white
+    }
+}
+
+// MARK: PHPhotoLibraryChangeObserver
+extension AlbumGridViewController: PHPhotoLibraryChangeObserver {
+    func photoLibraryDidChange(_ changeInstance: PHChange) {
+        refreshData()
     }
 }

@@ -96,16 +96,7 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
             PHImageManager.default().requestImageData(for: data.asset, options: options, resultHandler: { (data, _, _, _) in
                 guard let data = data else { return }
                 guard let image = OLImage(data: data) else { return }
-                // 调整
-                let scale = image.size.width / image.size.height
-                let newHeight = kScreenWidth / scale
-                let x: CGFloat = 0.0
-                var y = (self.frame.size.height - newHeight) / 2
-                if y < 0  {
-                    y = 0.0
-                    self.scrollView.contentSize = CGSize(width: kScreenWidth, height: newHeight)
-                }
-                self.assetImageView.frame = CGRect(x: x, y: y, width: kScreenWidth, height: newHeight)
+                self.assetImageView.frame = self.resetFrame(size: image.size)
                 self.assetImageView.image = image
             })
             // 设置Video
@@ -127,11 +118,23 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
                     let player = AVPlayer(playerItem: playItem)
                     self.playerLayer.player = player
                     self.playerLayer.videoGravity = AVLayerVideoGravityResizeAspect
-                    self.playerLayer.frame = CGRect(x: 0, y: 0, width: data.asset.pixelWidth, height: data.asset.pixelHeight)
+                    self.playerLayer.frame = self.resetFrame(size: CGSize(width: data.asset.pixelWidth, height: data.asset.pixelHeight))
                     player.play()
                 }
             })
         })
-
+    }
+    
+    private func resetFrame(size: CGSize) -> CGRect {
+        // 调整
+        let scale = size.width / size.height
+        let newHeight = kScreenWidth / scale
+        let x: CGFloat = 0.0
+        var y = (kScreenHeight - newHeight) / 2
+        if y < 0  {
+            y = 0.0
+            self.scrollView.contentSize = CGSize(width: kScreenWidth, height: newHeight)
+        }
+        return CGRect(x: x, y: y, width: kScreenWidth, height: newHeight)
     }
 }

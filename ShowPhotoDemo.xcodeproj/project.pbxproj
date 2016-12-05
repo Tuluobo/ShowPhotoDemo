@@ -131,6 +131,7 @@
 		D23699E41DF1550C006CF0EF /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				D23699F21DF2AA0C006CF0EF /* AlbumManager.swift */,
 				D23699E21DF15378006CF0EF /* Defines.swift */,
 			);
 			name = Utils;
@@ -166,7 +167,6 @@
 			isa = PBXGroup;
 			children = (
 				D23699EF1DF2A875006CF0EF /* HWAsset.swift */,
-				D23699F21DF2AA0C006CF0EF /* AlbumManager.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";

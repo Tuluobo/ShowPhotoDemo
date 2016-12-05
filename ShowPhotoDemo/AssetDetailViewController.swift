@@ -37,6 +37,12 @@ class AssetDetailViewController: UIViewController {
         closeBtn.setImage(UIImage(named: "back"), for: .normal)
         self.view.addSubview(closeBtn)
         closeBtn.addTarget(self, action: #selector(closeController), for: .touchUpInside)
+        // 删除按钮
+        let deleteBtnFrame = CGRect(x: kScreenWidth - (16+32), y: 28, width: 32, height: 32)
+        let deleteBtn = UIButton(frame: deleteBtnFrame)
+        deleteBtn.setImage(UIImage(named: "delete"), for: .normal)
+        self.view.addSubview(deleteBtn)
+        deleteBtn.addTarget(self, action: #selector(deleteThisAsset), for: .touchUpInside)
     }
     
     override func viewDidLayoutSubviews() {
@@ -50,6 +56,23 @@ class AssetDetailViewController: UIViewController {
     
     @objc private func closeController() {
         self.dismiss(animated: true, completion: nil)
+    }
+    
+    @objc private func deleteThisAsset() {
+        if let indexPath = collectionView.indexPathsForVisibleItems.last {
+            if let asset = assets[indexPath.item].asset {
+                PHPhotoLibrary.shared().performChanges({
+                    PHAssetChangeRequest.deleteAssets(NSArray(array: [asset]))
+                }, completionHandler: { (success, error) in
+                    HWLog("success:\(success)")
+                    HWLog("error:\(error)")
+                    if success {
+                        self.assets.remove(at: indexPath.item)
+                        self.collectionView.deleteItems(at: [indexPath])
+                    }
+                })
+            }
+        }
     }
     
 }

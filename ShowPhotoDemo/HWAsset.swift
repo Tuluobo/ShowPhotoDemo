@@ -10,8 +10,7 @@ import Foundation
 import Photos
 
 /***************
- jpeg,png
- gif
+ jpeg,png,gif
  livephoto
  视频
  延时拍摄
@@ -20,9 +19,6 @@ import Photos
 ***************/
 enum HWAssetType: Int {
     case none = 0
-    case jpeg
-    case png
-    case gif
     case photoLive
     case burst      ///> 连拍
     
