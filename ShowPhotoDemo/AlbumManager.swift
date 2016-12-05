@@ -26,8 +26,6 @@ class AlbumManager {
     }()
     /// 慢动作视频
     private var slomosResults: PHFetchResult<PHAsset>?
-    /// 连拍
-    private var burstsResults: PHFetchResult<PHAsset>?
     
     /// 请求权限
     class func requestAuth(completed:(()->Void)?) {
@@ -74,7 +72,7 @@ class AlbumManager {
                 return "PhotoLive"
             }
             // 连拍
-            if let bursts = burstsResults, bursts.contains(asset) {
+            if asset.representsBurst {
                 return "连拍"
             }
             // 普通照片
@@ -96,19 +94,10 @@ class AlbumManager {
     /// 计算数据源
     private func fetchOtherData() {
         slomosResults = getSlomoVideos()
-        burstsResults = getBursts()
     }
     
     private func getSlomoVideos() -> PHFetchResult<PHAsset>? {
         let albums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumSlomoVideos, options: nil)
-        if albums.count > 0 {
-            return PHAsset.fetchAssets(in: albums[0], options: nil)
-        }
-        return nil
-    }
-    
-    private func getBursts() -> PHFetchResult<PHAsset>? {
-        let albums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumBursts, options: nil)
         if albums.count > 0 {
             return PHAsset.fetchAssets(in: albums[0], options: nil)
         }

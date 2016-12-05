@@ -18,13 +18,33 @@ class AssetDetailViewController: UIViewController {
     fileprivate var assetsResults: PHFetchResult<PHAsset>!
     var indexPath: IndexPath!
     
+    fileprivate var isSelecting = false
+    
     // MARK: 懒加载
+    /// CollectionView
     fileprivate lazy var collectionView: UICollectionView = {
         let clv = UICollectionView(frame: kScreenBounds, collectionViewLayout: AssetDetailLayout())
         clv.delegate = self
         clv.dataSource = self
         clv.register(AssetDetailCollectionViewCell.self, forCellWithReuseIdentifier: assetDetailCell)
         return clv
+    }()
+    /// 连拍视图
+    fileprivate lazy var burstsViewController: BurstsViewController = {
+        return UIStoryboard(name: "Bursts", bundle: nil).instantiateInitialViewController() as! BurstsViewController
+    }()
+    /// 控制区视图
+    fileprivate lazy var controlView: UIView = {
+        let view = UIView(frame: CGRect(x: 0, y: kScreenHeight - 44, width: kScreenWidth, height: 44))
+        view.backgroundColor = UIColor(white: 0.15, alpha: 0.5)
+        return view
+    }()
+    /// 选择按钮
+    fileprivate lazy var selectBtn: UIButton = {
+        let btn = UIButton(frame: CGRect(x: (kScreenWidth - 100) / 2.0, y: 6, width: 100, height: 32))
+        btn.addTarget(self, action: #selector(clickControlSelectBtn), for: .touchUpInside)
+        btn.setTitle("查看连拍", for: .normal)
+        return btn
     }()
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -58,6 +78,10 @@ class AssetDetailViewController: UIViewController {
         deleteBtn.setImage(UIImage(named: "delete"), for: .normal)
         self.view.addSubview(deleteBtn)
         deleteBtn.addTarget(self, action: #selector(deleteThisAsset), for: .touchUpInside)
+        // 控制区
+        view.addSubview(controlView)
+        // 选择按钮
+        controlView.addSubview(selectBtn)
     }
     
     override func viewDidLayoutSubviews() {
@@ -75,6 +99,7 @@ class AssetDetailViewController: UIViewController {
         DispatchQueue.main.async { () -> Void in
             self.collectionView.reloadData()
             self.collectionView.scrollToItem(at: self.indexPath, at: .left, animated: false)
+            self.controlView.isHidden = !self.assetsResults[self.indexPath.item].representsBurst
         }
     }
     
@@ -93,6 +118,28 @@ class AssetDetailViewController: UIViewController {
         }
     }
     
+    /// 选择连拍照片
+    @objc private func clickControlSelectBtn() {
+        if isSelecting {
+            burstsViewController.view.removeFromSuperview()
+            burstsViewController.removeFromParentViewController()
+            selectBtn.setTitle("查看连拍", for: .normal)
+            isSelecting = false
+        } else{
+            if let indexPath = collectionView.indexPathsForVisibleItems.last, let identifier = assetsResults[indexPath.item].burstIdentifier {
+                
+                let options = PHFetchOptions()
+                options.includeAllBurstAssets = true
+                let assets = PHAsset.fetchAssets(withBurstIdentifier: identifier, options: options)
+                self.view.insertSubview(burstsViewController.view, belowSubview: controlView)
+                self.addChildViewController(burstsViewController)
+                burstsViewController.assets = assets
+                burstsViewController.collectionView?.reloadData()
+                selectBtn.setTitle("完成", for: .normal)
+                isSelecting = true
+            }
+        }
+    }
 }
 
 // MARK: UICollectionViewDelegatem, UICollectionViewDataSource
@@ -106,6 +153,13 @@ extension AssetDetailViewController: UICollectionViewDelegate, UICollectionViewD
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: assetDetailCell, for: indexPath) as! AssetDetailCollectionViewCell
         cell.asset = assetsResults[indexPath.item]
         return cell
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        isSelecting = false
+        if let indexPath = collectionView.indexPathsForVisibleItems.last {
+            controlView.isHidden = !assetsResults[indexPath.item].representsBurst
+        }
     }
 
 }

@@ -22,6 +22,9 @@
 		D23F5AE31DED15820087E5AE /* ShowPhotoDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D23F5AE21DED15820087E5AE /* ShowPhotoDemoTests.swift */; };
 		D23F5AEE1DED15820087E5AE /* ShowPhotoDemoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D23F5AED1DED15820087E5AE /* ShowPhotoDemoUITests.swift */; };
 		D2ECC73A1DF5562E00E5721D /* AlbumTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2ECC7391DF5562E00E5721D /* AlbumTableViewController.swift */; };
+		D2ECC73C1DF58F5E00E5721D /* BurstsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2ECC73B1DF58F5E00E5721D /* BurstsViewController.swift */; };
+		D2ECC73E1DF5912900E5721D /* Bursts.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D2ECC73D1DF5912900E5721D /* Bursts.storyboard */; };
+		D2ECC7401DF5917400E5721D /* BurstCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2ECC73F1DF5917400E5721D /* BurstCollectionViewCell.swift */; };
 		F509D2365725E8ADC3C1A64D /* Pods_ShowPhotoDemoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D64842D628A49E1F64EF9F5E /* Pods_ShowPhotoDemoUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -71,6 +74,9 @@
 		D23F5AED1DED15820087E5AE /* ShowPhotoDemoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowPhotoDemoUITests.swift; sourceTree = "<group>"; };
 		D23F5AEF1DED15820087E5AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D2ECC7391DF5562E00E5721D /* AlbumTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlbumTableViewController.swift; sourceTree = "<group>"; };
+		D2ECC73B1DF58F5E00E5721D /* BurstsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BurstsViewController.swift; sourceTree = "<group>"; };
+		D2ECC73D1DF5912900E5721D /* Bursts.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Bursts.storyboard; sourceTree = "<group>"; };
+		D2ECC73F1DF5917400E5721D /* BurstCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BurstCollectionViewCell.swift; sourceTree = "<group>"; };
 		D64842D628A49E1F64EF9F5E /* Pods_ShowPhotoDemoUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShowPhotoDemoUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -141,6 +147,7 @@
 				D2ECC7391DF5562E00E5721D /* AlbumTableViewController.swift */,
 				D23699DB1DED1A6A006CF0EF /* AlbumGridViewController.swift */,
 				D23699E71DF26773006CF0EF /* AssetDetailViewController.swift */,
+				D2ECC73B1DF58F5E00E5721D /* BurstsViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -150,6 +157,7 @@
 			children = (
 				D23699DD1DED1BC9006CF0EF /* AlbumGridViewCell.swift */,
 				D23699F41DF2DB55006CF0EF /* AssetDetailCollectionViewCell.swift */,
+				D2ECC73F1DF5917400E5721D /* BurstCollectionViewCell.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -181,6 +189,7 @@
 			children = (
 				D23F5ACD1DED15820087E5AE /* AppDelegate.swift */,
 				D23F5AD11DED15820087E5AE /* Main.storyboard */,
+				D2ECC73D1DF5912900E5721D /* Bursts.storyboard */,
 				D23699E51DF15522006CF0EF /* ViewControllers */,
 				D23699E61DF1552D006CF0EF /* Views */,
 				D23699E41DF1550C006CF0EF /* Utils */,
@@ -338,6 +347,7 @@
 			files = (
 				D23F5AD81DED15820087E5AE /* LaunchScreen.storyboard in Resources */,
 				D23F5AD51DED15820087E5AE /* Assets.xcassets in Resources */,
+				D2ECC73E1DF5912900E5721D /* Bursts.storyboard in Resources */,
 				D23F5AD31DED15820087E5AE /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -491,9 +501,11 @@
 				D23699DE1DED1BC9006CF0EF /* AlbumGridViewCell.swift in Sources */,
 				D23699F31DF2AA0C006CF0EF /* AlbumManager.swift in Sources */,
 				D23699DC1DED1A6A006CF0EF /* AlbumGridViewController.swift in Sources */,
+				D2ECC7401DF5917400E5721D /* BurstCollectionViewCell.swift in Sources */,
 				D23699E31DF15378006CF0EF /* Defines.swift in Sources */,
 				D23699E81DF26773006CF0EF /* AssetDetailViewController.swift in Sources */,
 				D23F5ACE1DED15820087E5AE /* AppDelegate.swift in Sources */,
+				D2ECC73C1DF58F5E00E5721D /* BurstsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

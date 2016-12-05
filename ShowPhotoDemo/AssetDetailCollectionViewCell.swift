@@ -10,7 +10,10 @@ import UIKit
 import Photos
 import PhotosUI
 import OLImageView.OLImage
-import OLImageView.OLImageView
+
+protocol AssetDetailCollectionViewCellDelegate: NSObjectProtocol {
+    func showBurstsView(cell: AssetDetailCollectionViewCell, isSelecting: Bool)
+}
 
 class AssetDetailCollectionViewCell: UICollectionViewCell {
     
@@ -20,6 +23,7 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
             updateUI()
         }
     }
+    weak var delegate: AssetDetailCollectionViewCellDelegate?
     private var isPlaying = false
     
     // MARK: 懒加载
@@ -45,9 +49,9 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
         view.backgroundColor = UIColor(white: 0.15, alpha: 0.5)
         return view
     }()
-    fileprivate lazy var controlBtn: UIButton = {
+    fileprivate lazy var controlPlayBtn: UIButton = {
         let btn = UIButton(frame: CGRect(x: (kScreenWidth - 32) / 2.0, y: 6, width: 32, height: 32))
-        btn.addTarget(self, action: #selector(clickControlBtn), for: .touchUpInside)
+        btn.addTarget(self, action: #selector(clickControlPlayBtn), for: .touchUpInside)
         return btn
     }()
     
@@ -72,24 +76,26 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
         contentView.layer.addSublayer(playerLayer)
         // 播放按钮
         contentView.addSubview(videoPlayBtn)
-        videoPlayBtn.addTarget(self, action: #selector(clickControlBtn), for: .touchUpInside)
-        // 播放控制区
-        controlView.addSubview(controlBtn)
+        videoPlayBtn.addTarget(self, action: #selector(clickControlPlayBtn), for: .touchUpInside)
+        // 控制区
         contentView.addSubview(controlView)
+        controlView.addSubview(controlPlayBtn)
     }
     
     // MARK: 内部方法
     // 更新UI
     private func updateUI() {
+        
         controlView.isHidden = true
+        isPlaying = false
+        controlPlayBtn.isHidden = true
+        videoPlayBtn.isHidden = true
+        playerLayer.isHidden = true
+        
         assetImageView.image = nil
         assetImageView.isHidden = true
         assetPhotoLiveView.livePhoto = nil
         assetPhotoLiveView.isHidden = true
-        
-        isPlaying = false
-        videoPlayBtn.isHidden = true
-        playerLayer.isHidden = true
         
         guard let asset = asset else { return }
         if asset.mediaSubtypes == .photoLive {
@@ -119,6 +125,7 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
             if asset.mediaType == .video {
                 videoPlayBtn.isHidden = false
                 playerLayer.isHidden = false
+                controlPlayBtn.isHidden = false
                 PHImageManager.default().requestAVAsset(forVideo: asset, options: nil, resultHandler: { (avAsset: AVAsset?, mix: AVAudioMix?, info: [AnyHashable: Any]?) -> Void in
                     DispatchQueue.main.async(execute: { () -> Void in
                         guard let avAsset = avAsset else { return }
@@ -134,7 +141,7 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
         }
     }
     
-    @objc private func clickControlBtn() {
+    @objc private func clickControlPlayBtn() {
         isPlaying ? pause() : play()
     }
     
@@ -143,17 +150,18 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
         isPlaying = true
         videoPlayBtn.isHidden = true
         controlView.isHidden = false
-        controlBtn.setImage(UIImage(named: "zanting"), for: .normal)
+        controlPlayBtn.setImage(UIImage(named: "zanting"), for: .normal)
     }
     
     private func pause() {
         player.pause()
         isPlaying = false
-        self.videoPlayBtn.isHidden = false
-        self.controlView.isHidden = true
-        self.controlBtn.setImage(UIImage(named: "play"), for: .normal)
+        videoPlayBtn.isHidden = false
+        controlView.isHidden = true
+        controlPlayBtn.setImage(UIImage(named: "play"), for: .normal)
     }
     
+    /// 计算图像的Frame
     fileprivate func resetFrame(size: CGSize) -> CGRect {
         // 调整
         let scale = size.width / size.height
@@ -166,6 +174,8 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
         }
         return CGRect(x: x, y: y, width: kScreenWidth, height: newHeight)
     }
+    
+
 }
 
 // MARK: - UIScrollViewDelegate
