@@ -11,6 +11,7 @@ import Photos
 
 private let reuseIdentifier = "AlbumGridViewCell"
 private let detailSegueIdentifier = "DetailSegue"
+private let assetCollectionSegue = "CollectionSegue"
 
 class AlbumGridViewController: UICollectionViewController {
     
@@ -38,7 +39,9 @@ class AlbumGridViewController: UICollectionViewController {
         self.assetsResults = AlbumManager.sharedInstance.getAssetsForCollection(collection: assetCollection)
         DispatchQueue.main.async { () -> Void in
             self.collectionView?.reloadData()
+            if self.assetsResults.count > 0 {
             self.collectionView?.scrollToItem(at: IndexPath(row: self.assetsResults.count-1, section: 0), at: .bottom, animated: false)
+            }
         }
     }
     
@@ -66,6 +69,12 @@ class AlbumGridViewController: UICollectionViewController {
             if let destVC = segue.destination as? AssetDetailViewController {
                 destVC.assetCollection = assetCollection
                 destVC.indexPath = sender as! IndexPath
+            }
+        }
+        
+        if let identifier = segue.identifier, identifier == assetCollectionSegue {
+            if let destVC = segue.destination as? AlbumTableViewController {
+                destVC.presentViewController = self
             }
         }
     }

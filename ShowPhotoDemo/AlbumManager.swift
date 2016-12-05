@@ -49,6 +49,12 @@ class AlbumManager {
         }
     }
     
+    /// 获取所有相册集合
+    func getAssetCollections() -> PHFetchResult<PHAssetCollection> {
+        return PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .albumRegular, options: nil)
+    }
+    
+    /// 获取某一个相册集合的所有资源
     func getAssetsForCollection(collection: PHAssetCollection?) -> PHFetchResult<PHAsset> {
         var album = collection
         if album == nil {

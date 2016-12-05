@@ -35,10 +35,7 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
         return btn
     }()
     fileprivate lazy var assetImageView: UIImageView = UIImageView()
-    fileprivate lazy var assetPhotoLiveView: PHLivePhotoView = {
-        let livePhotoView = PHLivePhotoView(frame: kScreenBounds)
-        return livePhotoView
-    }()
+    fileprivate lazy var assetPhotoLiveView: PHLivePhotoView = PHLivePhotoView()
     fileprivate lazy var playerLayer: AVPlayerLayer = AVPlayerLayer()
     
     
@@ -54,14 +51,17 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
     
     private func setupUI() {
         scrollView.frame = kScreenBounds
-        // 媒体容器
+        // Image容器
         scrollView.addSubview(assetImageView)
+        // PhotoLive
         scrollView.addSubview(assetPhotoLiveView)
         contentView.addSubview(scrollView)
+        // Video
+        contentView.layer.addSublayer(playerLayer)
         // 播放按钮
         contentView.addSubview(videoPlayBtn)
         videoPlayBtn.addTarget(self, action: #selector(clickPlay), for: .touchUpInside)
-        contentView.layer.addSublayer(playerLayer)
+
     }
     
     // MARK: 内部方法
@@ -76,7 +76,6 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
         videoPlayBtn.isHidden = true
         playerLayer.isHidden = true
         
-        
         guard let asset = asset else { return }
         
         if asset.mediaSubtypes == .photoLive {
@@ -84,6 +83,8 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
             let options = PHLivePhotoRequestOptions()
             options.deliveryMode = .highQualityFormat
             PHImageManager.default().requestLivePhoto(for: asset, targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFit, options: options, resultHandler: { (photoLive, info) in
+                guard let photoLive = photoLive else { return }
+                self.assetPhotoLiveView.frame = self.resetFrame(size: photoLive.size)
                 self.assetPhotoLiveView.livePhoto = photoLive
                 self.assetPhotoLiveView.startPlayback(with: .hint)
             })
@@ -147,13 +148,21 @@ extension AssetDetailCollectionViewCell: UIScrollViewDelegate {
      *  返回一个scrollView的子控件进行缩放
      */
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        return self.assetImageView
+        if !self.assetImageView.isHidden {
+            return self.assetImageView
+        }
+        if !self.assetPhotoLiveView.isHidden {
+            return self.assetPhotoLiveView
+        }
+        return nil
     }
     
-    func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-        if let view = view {
-            self.assetImageView.frame = resetFrame(size: view.frame.size)
-        }
-        
+    // 让图片居中
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
+        let offsetX = (scrollView.bounds.size.width > scrollView.contentSize.width) ? (scrollView.bounds.size.width - scrollView.contentSize.width) * 0.5 : 0.0
+        let offsetY = (scrollView.bounds.size.height > scrollView.contentSize.height) ? (scrollView.bounds.size.height - scrollView.contentSize.height) * 0.5 : 0.0
+        let center = CGPoint(x: scrollView.contentSize.width * 0.5 + offsetX, y: scrollView.contentSize.height * 0.5 + offsetY)
+        assetImageView.center = center
+        assetPhotoLiveView.center = center
     }
 }
