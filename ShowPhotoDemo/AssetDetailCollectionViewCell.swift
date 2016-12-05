@@ -15,29 +15,31 @@ import OLImageView.OLImageView
 class AssetDetailCollectionViewCell: UICollectionViewCell {
     
     // 数据源
-    var asset: HWAsset? {
+    var asset: PHAsset? {
         didSet {
             updateUI()
         }
     }
     // MARK: 懒加载
-    private lazy var scrollView: UIScrollView = {
+    fileprivate lazy var scrollView: UIScrollView = {
         let sv = UIScrollView()
+        sv.delegate = self
+        sv.maximumZoomScale = 3.0
         return sv
     }()
-    private lazy var videoPlayBtn: UIButton = {
+    fileprivate lazy var videoPlayBtn: UIButton = {
         let width = kScreenWidth / 3.0
         let frame = CGRect(x: (kScreenWidth-width) / 2.0, y: (kScreenHeight-width) / 2.0, width: width, height: width)
         let btn = UIButton(frame: frame)
         btn.setImage(UIImage(named: "video-play"), for: .normal)
         return btn
     }()
-    private lazy var assetImageView: UIImageView = UIImageView()
-    private lazy var assetPhotoLiveView: PHLivePhotoView = {
+    fileprivate lazy var assetImageView: UIImageView = UIImageView()
+    fileprivate lazy var assetPhotoLiveView: PHLivePhotoView = {
         let livePhotoView = PHLivePhotoView(frame: kScreenBounds)
         return livePhotoView
     }()
-    private lazy var playerLayer: AVPlayerLayer = AVPlayerLayer()
+    fileprivate lazy var playerLayer: AVPlayerLayer = AVPlayerLayer()
     
     
     // MARK: 生命周期方法
@@ -75,13 +77,13 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
         playerLayer.isHidden = true
         
         
-        guard let data = asset else { return }
+        guard let asset = asset else { return }
         
-        if data.assetType == .photoLive {
+        if asset.mediaSubtypes == .photoLive {
             assetPhotoLiveView.isHidden = false
             let options = PHLivePhotoRequestOptions()
             options.deliveryMode = .highQualityFormat
-            PHImageManager.default().requestLivePhoto(for: data.asset, targetSize: CGSize(width: data.asset.pixelWidth, height: data.asset.pixelHeight), contentMode: .aspectFit, options: options, resultHandler: { (photoLive, info) in
+            PHImageManager.default().requestLivePhoto(for: asset, targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFit, options: options, resultHandler: { (photoLive, info) in
                 self.assetPhotoLiveView.livePhoto = photoLive
                 self.assetPhotoLiveView.startPlayback(with: .hint)
             })
@@ -93,14 +95,14 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
             options.isSynchronous = false
             options.deliveryMode = .highQualityFormat
             options.resizeMode = .exact
-            PHImageManager.default().requestImageData(for: data.asset, options: options, resultHandler: { (data, _, _, _) in
+            PHImageManager.default().requestImageData(for: asset, options: options, resultHandler: { (data, _, _, _) in
                 guard let data = data else { return }
                 guard let image = OLImage(data: data) else { return }
                 self.assetImageView.frame = self.resetFrame(size: image.size)
                 self.assetImageView.image = image
             })
             // 设置Video
-            if asset?.asset.mediaType == .video {
+            if asset.mediaType == .video {
                 videoPlayBtn.isHidden = false
                 playerLayer.isHidden = false
             }
@@ -109,23 +111,23 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
     
     @objc private func clickPlay() {
         
-        guard let data = asset else { return }
-        PHImageManager.default().requestAVAsset(forVideo: data.asset, options: nil, resultHandler: { (asset: AVAsset?, mix: AVAudioMix?, info: [AnyHashable: Any]?) -> Void in
+        guard let asset = asset else { return }
+        PHImageManager.default().requestAVAsset(forVideo: asset, options: nil, resultHandler: { (avAsset: AVAsset?, mix: AVAudioMix?, info: [AnyHashable: Any]?) -> Void in
             DispatchQueue.main.async(execute: { () -> Void in
-                if asset != nil {
-                    let playItem = AVPlayerItem(asset: asset!)
+                if avAsset != nil {
+                    let playItem = AVPlayerItem(asset: avAsset!)
                     playItem.audioMix = mix
                     let player = AVPlayer(playerItem: playItem)
                     self.playerLayer.player = player
                     self.playerLayer.videoGravity = AVLayerVideoGravityResizeAspect
-                    self.playerLayer.frame = self.resetFrame(size: CGSize(width: data.asset.pixelWidth, height: data.asset.pixelHeight))
+                    self.playerLayer.frame = self.resetFrame(size: CGSize(width: asset.pixelWidth, height: asset.pixelHeight))
                     player.play()
                 }
             })
         })
     }
     
-    private func resetFrame(size: CGSize) -> CGRect {
+    fileprivate func resetFrame(size: CGSize) -> CGRect {
         // 调整
         let scale = size.width / size.height
         let newHeight = kScreenWidth / scale
@@ -136,5 +138,22 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
             self.scrollView.contentSize = CGSize(width: kScreenWidth, height: newHeight)
         }
         return CGRect(x: x, y: y, width: kScreenWidth, height: newHeight)
+    }
+}
+
+// MARK: - UIScrollViewDelegate
+extension AssetDetailCollectionViewCell: UIScrollViewDelegate {
+    /**
+     *  返回一个scrollView的子控件进行缩放
+     */
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+        return self.assetImageView
+    }
+    
+    func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+        if let view = view {
+            self.assetImageView.frame = resetFrame(size: view.frame.size)
+        }
+        
     }
 }

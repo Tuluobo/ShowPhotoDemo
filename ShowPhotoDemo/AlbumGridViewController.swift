@@ -16,7 +16,9 @@ class AlbumGridViewController: UICollectionViewController {
     
     // MARK: 普通变量
     /// 数据源
-    private var assetsResults = [HWAsset]()
+    /// 相册
+    var assetCollection: PHAssetCollection?
+    fileprivate var assetsResults: PHFetchResult<PHAsset>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +35,7 @@ class AlbumGridViewController: UICollectionViewController {
     
     /// 刷新数据
     func refreshData() {
-        self.assetsResults = AlbumManager.sharedInstance.assets
+        self.assetsResults = AlbumManager.sharedInstance.getAssetsForCollection(collection: assetCollection)
         DispatchQueue.main.async { () -> Void in
             self.collectionView?.reloadData()
             self.collectionView?.scrollToItem(at: IndexPath(row: self.assetsResults.count-1, section: 0), at: .bottom, animated: false)
@@ -41,11 +43,7 @@ class AlbumGridViewController: UICollectionViewController {
     }
     
     // MARK: UICollectionViewDataSource
-
-    override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
-    }
-
+    
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return assetsResults.count
     }
@@ -66,7 +64,7 @@ class AlbumGridViewController: UICollectionViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let identifier = segue.identifier, identifier == detailSegueIdentifier {
             if let destVC = segue.destination as? AssetDetailViewController {
-                destVC.assets = assetsResults
+                destVC.assetCollection = assetCollection
                 destVC.indexPath = sender as! IndexPath
             }
         }
@@ -90,6 +88,13 @@ class PhotoCollectionViewFlowLayout: UICollectionViewFlowLayout {
 // MARK: PHPhotoLibraryChangeObserver
 extension AlbumGridViewController: PHPhotoLibraryChangeObserver {
     func photoLibraryDidChange(_ changeInstance: PHChange) {
-        refreshData()
+        DispatchQueue.main.async {
+            if let change = changeInstance.changeDetails(for: self.assetsResults) {
+                if change.hasIncrementalChanges {
+                    self.refreshData()
+                }
+            }
+
+        }
     }
 }

@@ -15,7 +15,7 @@ class AlbumGridViewCell: UICollectionViewCell {
     @IBOutlet weak var playImageView: UIImageView!
     @IBOutlet weak var tagLabel: UILabel!
     
-    var asset: HWAsset? {
+    var asset: PHAsset? {
         didSet {
             updateUI()
         }
@@ -27,30 +27,24 @@ class AlbumGridViewCell: UICollectionViewCell {
         playImageView.isHidden = true
         tagLabel.isHidden = true
         
-        guard let data = asset else { return }
+        guard let asset = asset else { return }
         
-        switch data.asset.mediaType {
+        switch asset.mediaType {
             case .image:
-                if data.assetType == .photoLive {
+                if let type = AlbumManager.sharedInstance.getType(asset: asset) {
                     tagLabel.isHidden = false
-                    tagLabel.text = "PhotoLive"
-                } else if data.assetType == .burst {
-                    tagLabel.isHidden = false
-                    tagLabel.text = "连拍"
+                    tagLabel.text = type
                 }
             case .video:
                 playImageView.isHidden = false
                 tagLabel.isHidden = false
-                tagLabel.text = "视频"
-                if data.assetType == .slomo {
-                    tagLabel.text = "慢动作"
-                } else if data.assetType == .timeLapse {
-                    tagLabel.text = "延时"
-                }
+                if let type = AlbumManager.sharedInstance.getType(asset: asset) {
+                    tagLabel.text = type
+            }
             default: break
         }
         
-        PHImageManager.default().requestImage(for: data.asset, targetSize: kTargetSize, contentMode: .aspectFill, options: nil) { (image, info) in
+        PHImageManager.default().requestImage(for: asset, targetSize: kTargetSize, contentMode: .aspectFill, options: nil) { (image, info) in
             self.thumbImageView.image = image
         }
     }

@@ -14,19 +14,34 @@ private let assetDetailCell = "AssetDetailCell"
 class AssetDetailViewController: UIViewController {
     
     // MARK: 数据源
-    var assets: [HWAsset]!
+    var assetCollection: PHAssetCollection?
+    fileprivate var assetsResults: PHFetchResult<PHAsset>!
     var indexPath: IndexPath!
     
     // MARK: 懒加载
-    private lazy var collectionView: UICollectionView = {
+    fileprivate lazy var collectionView: UICollectionView = {
         let clv = UICollectionView(frame: kScreenBounds, collectionViewLayout: AssetDetailLayout())
+        clv.delegate = self
         clv.dataSource = self
         clv.register(AssetDetailCollectionViewCell.self, forCellWithReuseIdentifier: assetDetailCell)
         return clv
     }()
     
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupUI()
+        // 相册的监听
+        PHPhotoLibrary.shared().register(self)
+    }
+    deinit {
+        PHPhotoLibrary.shared().unregisterChangeObserver(self)
+    }
+    
+    private func setupUI() {
         // 添加子视图 CollectionView
         self.view.addSubview(collectionView)
         // 去除自动调整 Scrollview
@@ -47,31 +62,34 @@ class AssetDetailViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        collectionView.scrollToItem(at: indexPath, at: .left, animated: false)
+        // 获取权限
+        AlbumManager.requestAuth {
+            // 请求数据
+            self.refreshData()
+        }
     }
     
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
+    /// 刷新数据
+    func refreshData() {
+        self.assetsResults = AlbumManager.sharedInstance.getAssetsForCollection(collection: assetCollection)
+        DispatchQueue.main.async { () -> Void in
+            self.collectionView.reloadData()
+            self.collectionView.scrollToItem(at: self.indexPath, at: .left, animated: false)
+        }
     }
     
+    /// 关闭视图
     @objc private func closeController() {
         self.dismiss(animated: true, completion: nil)
     }
     
+    /// 删除资源
     @objc private func deleteThisAsset() {
-        if let indexPath = collectionView.indexPathsForVisibleItems.last {
-            if let asset = assets[indexPath.item].asset {
-                PHPhotoLibrary.shared().performChanges({
-                    PHAssetChangeRequest.deleteAssets(NSArray(array: [asset]))
-                }, completionHandler: { (success, error) in
-                    HWLog("success:\(success)")
-                    HWLog("error:\(error)")
-                    if success {
-                        self.assets.remove(at: indexPath.item)
-                        self.collectionView.deleteItems(at: [indexPath])
-                    }
-                })
-            }
+        if let iPath = collectionView.indexPathsForVisibleItems.last {
+            let asset = assetsResults[iPath.item]
+            PHPhotoLibrary.shared().performChanges({
+                PHAssetChangeRequest.deleteAssets(NSArray(array: [asset]))
+            })
         }
     }
     
@@ -81,13 +99,55 @@ class AssetDetailViewController: UIViewController {
 extension AssetDetailViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return assets.count
+        return assetsResults.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: assetDetailCell, for: indexPath) as! AssetDetailCollectionViewCell
-        cell.asset = assets[indexPath.item]
+        cell.asset = assetsResults[indexPath.item]
         return cell
+    }
+
+}
+
+// MARK: PHPhotoLibraryChangeObserver
+extension AssetDetailViewController: PHPhotoLibraryChangeObserver {
+    func photoLibraryDidChange(_ changeInstance: PHChange) {
+        DispatchQueue.main.async {
+            if let collectionChanges = changeInstance.changeDetails(for: self.assetsResults) {
+                self.assetsResults = collectionChanges.fetchResultAfterChanges
+                if collectionChanges.hasIncrementalChanges {
+                    var removedPaths = [IndexPath]()
+                    var insertedPaths = [IndexPath]()
+                    if let removed = collectionChanges.removedIndexes {
+                        removedPaths = self.indexPathsFromIndexSet(indexSet: removed)
+                    }
+                    if let inserted = collectionChanges.insertedIndexes {
+                        insertedPaths = self.indexPathsFromIndexSet(indexSet: inserted)
+                    }
+                    self.collectionView.performBatchUpdates(
+                        {
+                            if removedPaths.count > 0 {
+                                self.collectionView.deleteItems(at: removedPaths)
+                            }
+                            if insertedPaths.count > 0 {
+                                self.collectionView.insertItems(at: insertedPaths)
+                            }
+                    }, completion: nil)
+                } else {
+                    self.refreshData()
+                }
+            }
+ 
+        }
+    }
+    
+    private func indexPathsFromIndexSet(indexSet: IndexSet) -> [IndexPath] {
+        var indexPaths = [IndexPath]()
+        for index in indexSet {
+            indexPaths.append(IndexPath(row: index, section: 0))
+        }
+        return indexPaths
     }
 }
 
