@@ -14,7 +14,7 @@ class AlbumGridViewController: UICollectionViewController {
     /// 相册
     var assetCollection: PHAssetCollection?
     /// 数据源
-    fileprivate var assetsResults: PHFetchResult<PHAsset>!
+    fileprivate var assetsResults: PHFetchResult<PHAsset>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,21 +34,21 @@ class AlbumGridViewController: UICollectionViewController {
         self.assetsResults = AlbumManager.sharedInstance.getAssetsForCollection(collection: assetCollection)
         DispatchQueue.main.async { () -> Void in
             self.collectionView?.reloadData()
-            if self.assetsResults.count > 0 {
-            self.collectionView?.scrollToItem(at: IndexPath(row: self.assetsResults.count-1, section: 0), at: .bottom, animated: false)
+            if let assetsResults = self.assetsResults, assetsResults.count > 0 {
+            self.collectionView?.scrollToItem(at: IndexPath(row: assetsResults.count-1, section: 0), at: .bottom, animated: false)
             }
         }
     }
     
     // MARK: UICollectionViewDataSource
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return assetsResults.count
+        return assetsResults?.count ?? 0
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
 
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: kAlbumGridViewCell, for: indexPath) as! AlbumGridViewCell
-        cell.asset = assetsResults[indexPath.item]
+        cell.asset = assetsResults![indexPath.item]
         return cell
     }
     
@@ -93,12 +93,13 @@ class PhotoCollectionViewFlowLayout: UICollectionViewFlowLayout {
 extension AlbumGridViewController: PHPhotoLibraryChangeObserver {
     func photoLibraryDidChange(_ changeInstance: PHChange) {
         DispatchQueue.main.async {
-            if let change = changeInstance.changeDetails(for: self.assetsResults) {
-                if change.hasIncrementalChanges {
-                    self.refreshData()
+            if let assetsResults = self.assetsResults {
+                if let change = changeInstance.changeDetails(for: assetsResults) {
+                    if change.hasIncrementalChanges {
+                        self.refreshData()
+                    }
                 }
             }
-
         }
     }
 }

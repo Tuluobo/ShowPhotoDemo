@@ -18,10 +18,10 @@ class AlbumTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // 注册监听
-        PHPhotoLibrary.shared().register(self)
         // 刷新数据
         refreshData()
+        // 注册监听
+        PHPhotoLibrary.shared().register(self)
     }
     deinit {
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
