@@ -62,6 +62,11 @@ class AlbumManager {
         let fetchOptions = PHFetchOptions()
         fetchOptions.predicate = NSPredicate(format: "mediaType == %d || mediaType == %d", PHAssetMediaType.image.rawValue, PHAssetMediaType.video.rawValue)
         let assets = PHAsset.fetchAssets(in: album!, options: fetchOptions)
+        var assetCaches = [PHAsset]()
+        for i in 0..<assets.count {
+            assetCaches.append(assets[i])
+        }
+        cacheIManager.startCachingImages(for: assetCaches, targetSize: kTargetSize, contentMode: .aspectFit, options: nil)
         fetchOtherData()
         return assets
     }

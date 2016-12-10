@@ -61,7 +61,7 @@ class AlbumTableViewController: UITableViewController {
         cell.detailTextLabel?.text = "\(phAssetFetchResult.count)"
         return cell
     }
-    
+     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         presentViewController.assetCollection = assetCollecitons[indexPath.section][indexPath.item]
         presentViewController.refreshData()
