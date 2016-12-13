@@ -67,7 +67,7 @@ class AlbumGridViewController: UICollectionViewController {
         // 显示大图
         if let identifier = segue.identifier, identifier == kAssetDetailViewSegue {
             if let destVC = segue.destination as? AssetDetailViewController {
-                destVC.assetCollection = assetCollection
+                destVC.assetsResults = assetsResults
                 destVC.indexPath = sender as! IndexPath
             }
         }

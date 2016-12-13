@@ -12,8 +12,7 @@ import Photos
 class AssetDetailViewController: UIViewController {
     
     // MARK: 数据源
-    var assetCollection: PHAssetCollection?
-    fileprivate var assetsResults: PHFetchResult<PHAsset>!
+    var assetsResults: PHFetchResult<PHAsset>!
     var indexPath: IndexPath!
     
     /// 对于连拍照片的是否正在展示标记
@@ -90,20 +89,9 @@ class AssetDetailViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // 获取权限
-        AlbumManager.requestAuth {
-            self.refreshData()
-        }
-    }
-    
-    /// 刷新数据
-    func refreshData() {
-        self.assetsResults = AlbumManager.sharedInstance.getAssetsForCollection(collection: assetCollection)
-        DispatchQueue.main.async { () -> Void in
-            self.collectionView.reloadData()
-            self.collectionView.scrollToItem(at: self.indexPath, at: .left, animated: false)
-            self.controlView.isHidden = !self.assetsResults[self.indexPath.item].representsBurst
-        }
+        // 刷新数据
+        collectionView.scrollToItem(at: self.indexPath, at: .left, animated: false)
+        controlView.isHidden = !self.assetsResults[self.indexPath.item].representsBurst
     }
     
     /// 关闭视图
@@ -192,7 +180,7 @@ extension AssetDetailViewController: PHPhotoLibraryChangeObserver {
                             }
                     }, completion: nil)
                 } else {
-                    self.refreshData()
+                    self.collectionView.reloadData()
                 }
             }
  
