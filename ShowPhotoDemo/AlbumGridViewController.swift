@@ -8,6 +8,7 @@
 
 import UIKit
 import Photos
+import SVProgressHUD
 
 class AlbumGridViewController: UICollectionViewController {
     
@@ -31,11 +32,15 @@ class AlbumGridViewController: UICollectionViewController {
     
     /// 刷新数据
     func refreshData() {
-        self.assetsResults = AlbumManager.sharedInstance.getAssetsForCollection(collection: assetCollection)
-        DispatchQueue.main.async { () -> Void in
-            self.collectionView?.reloadData()
-            if let assetsResults = self.assetsResults, assetsResults.count > 0 {
-            self.collectionView?.scrollToItem(at: IndexPath(row: assetsResults.count-1, section: 0), at: .bottom, animated: false)
+        SVProgressHUD.show()
+        DispatchQueue.global().async {
+            self.assetsResults = AlbumManager.sharedInstance.getAssetsForCollection(collection: self.assetCollection)
+            DispatchQueue.main.async {
+                SVProgressHUD.dismiss()
+                self.collectionView?.reloadData()
+                if let assetsResults = self.assetsResults, assetsResults.count > 0 {
+                self.collectionView?.scrollToItem(at: IndexPath(row: assetsResults.count-1, section: 0), at: .bottom, animated: false)
+                }
             }
         }
     }
