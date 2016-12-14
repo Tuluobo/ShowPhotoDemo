@@ -15,51 +15,9 @@ class AssetDetailViewController: UIViewController {
     var assetsResults: PHFetchResult<PHAsset>!
     var indexPath: IndexPath!
     
+    // MARK: 属性
     /// 对于连拍照片的是否正在展示标记
     fileprivate var isShowing = false
-    
-    // MARK: 懒加载
-    /// UIScrollView
-    fileprivate lazy var contentView: UIScrollView = {
-        let cv = UIScrollView(frame: kScreenBounds)
-        cv.isPagingEnabled = true
-        cv.delegate = self
-        return cv
-    }()
-    /// 返回按钮
-    fileprivate lazy var closeBtn: UIButton = {
-        let frame = CGRect(x: 16, y: 28, width: 32, height: 32)
-        let btn = UIButton(frame: frame)
-        btn.setImage(UIImage(named: "back"), for: .normal)
-        btn.addTarget(self, action: #selector(closeController), for: .touchUpInside)
-        return btn
-    }()
-    /// 删除按钮
-    fileprivate lazy var deleteBtn: UIButton = {
-        let frame = CGRect(x: kScreenWidth - (16+32), y: 28, width: 32, height: 32)
-        let btn = UIButton(frame: frame)
-        btn.setImage(UIImage(named: "delete"), for: .normal)
-        btn.addTarget(self, action: #selector(deleteThisAsset), for: .touchUpInside)
-        return btn
-    }()
-    /// 连拍视图
-    fileprivate lazy var burstsViewController: BurstsViewController = {
-        return UIStoryboard(name: "Bursts", bundle: nil).instantiateInitialViewController() as! BurstsViewController
-    }()
-    /// 控制区视图
-    fileprivate lazy var controlView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: kScreenHeight - 44, width: kScreenWidth, height: 44))
-        view.backgroundColor = UIColor(white: 0.15, alpha: 0.5)
-        return view
-    }()
-    /// 选择按钮
-    fileprivate lazy var selectBtn: UIButton = {
-        let btn = UIButton(frame: CGRect(x: (kScreenWidth - 100) / 2.0, y: 6, width: 100, height: 32))
-        btn.addTarget(self, action: #selector(clickControlSelectBtn), for: .touchUpInside)
-        btn.setTitle("查看连拍", for: .normal)
-        return btn
-    }()
-    
     /// 状态栏字体显示为白色
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -67,18 +25,19 @@ class AssetDetailViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // 添加子视图 contentView
+        // 1.内容区域
         self.view.addSubview(contentView)
         // 去除自动调整 Scrollview
         automaticallyAdjustsScrollViewInsets = false
-        // 关闭按钮
+        contentView.addSubview(assetCellView)
+        // 2.Nav区域
         self.view.addSubview(closeBtn)
-        // 删除按钮
         self.view.addSubview(deleteBtn)
-        // 控制区
+        // 3.TabBar区域
         view.addSubview(controlView)
-        // 选择按钮
         controlView.addSubview(selectBtn)
+        // 4.Other
+        setupCellView(row: indexPath.item)
         // 相册的监听
         PHPhotoLibrary.shared().register(self)
     }
@@ -86,13 +45,11 @@ class AssetDetailViewController: UIViewController {
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        // 刷新数据
-        var offset = contentView.contentOffset
-        offset.x = CGFloat(indexPath.item) * kScreenWidth
-        contentView.setContentOffset(offset, animated: false)
-        controlView.isHidden = !self.assetsResults[self.indexPath.item].representsBurst
+    fileprivate func setupCellView(row: Int) {
+        let asset = assetsResults[row]
+        assetCellView.frame = contentView.bounds
+        assetCellView.asset = asset
+        controlView.isHidden = !asset.representsBurst
     }
     
     /// 关闭视图
@@ -131,17 +88,74 @@ class AssetDetailViewController: UIViewController {
             }
         }
     }
+    
+    // MARK: 懒加载
+    /// UIScrollView
+    fileprivate lazy var contentView: UIScrollView = {
+        let cv = UIScrollView(frame: kScreenBounds)
+        cv.backgroundColor = UIColor.black
+        cv.isPagingEnabled = true
+        cv.showsHorizontalScrollIndicator = false
+        cv.showsVerticalScrollIndicator = false
+        cv.delegate = self
+        cv.contentSize = CGSize(width: kScreenWidth*CGFloat(self.assetsResults.count), height: kScreenHeight)
+        var offset = cv.contentOffset
+        offset.x = CGFloat(self.indexPath.item) * kScreenWidth
+        cv.setContentOffset(offset, animated: false)
+        return cv
+    }()
+    /// 展示图片的View
+    fileprivate lazy var assetCellView: AssetDetailView = {
+        let view = AssetDetailView(frame: kScreenBounds)
+        return view
+    }()
+    /// 返回按钮
+    fileprivate lazy var closeBtn: UIButton = {
+        let frame = CGRect(x: 16, y: 28, width: 32, height: 32)
+        let btn = UIButton(frame: frame)
+        btn.setImage(UIImage(named: "back"), for: .normal)
+        btn.addTarget(self, action: #selector(closeController), for: .touchUpInside)
+        return btn
+    }()
+    /// 删除按钮
+    fileprivate lazy var deleteBtn: UIButton = {
+        let frame = CGRect(x: kScreenWidth - (16+32), y: 28, width: 32, height: 32)
+        let btn = UIButton(frame: frame)
+        btn.setImage(UIImage(named: "delete"), for: .normal)
+        btn.addTarget(self, action: #selector(deleteThisAsset), for: .touchUpInside)
+        return btn
+    }()
+    /// 连拍视图
+    fileprivate lazy var burstsViewController: BurstsViewController = {
+        return UIStoryboard(name: "Bursts", bundle: nil).instantiateInitialViewController() as! BurstsViewController
+    }()
+    /// 控制区视图
+    fileprivate lazy var controlView: UIView = {
+        let view = UIView(frame: CGRect(x: 0, y: kScreenHeight - 44, width: kScreenWidth, height: 44))
+        view.backgroundColor = UIColor(white: 0.15, alpha: 0.5)
+        return view
+    }()
+    /// 选择按钮
+    fileprivate lazy var selectBtn: UIButton = {
+        let btn = UIButton(frame: CGRect(x: (kScreenWidth - 100) / 2.0, y: 6, width: 100, height: 32))
+        btn.addTarget(self, action: #selector(clickControlSelectBtn), for: .touchUpInside)
+        btn.setTitle("查看连拍", for: .normal)
+        return btn
+    }()
+
 }
 
 // MARK: UICollectionViewDelegatem, UICollectionViewDataSource
 extension AssetDetailViewController: UIScrollViewDelegate {
     
-//    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-//        isShowing = false
-//        if let indexPath = collectionView.indexPathsForVisibleItems.last {
-//            controlView.isHidden = !assetsResults[indexPath.item].representsBurst
-//        }
-//    }
+    /**
+     * 在scrollView滚动动画结束时, 就会调用这个方法
+     * 前提: 人为拖拽scrollView产生的滚动动画
+     */
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        let row = Int(scrollView.contentOffset.x / kScreenWidth)
+        setupCellView(row: row)
+    }
 
 }
 
@@ -150,6 +164,4 @@ extension AssetDetailViewController: PHPhotoLibraryChangeObserver {
     func photoLibraryDidChange(_ changeInstance: PHChange) {
         
     }
-    
-    
 }
