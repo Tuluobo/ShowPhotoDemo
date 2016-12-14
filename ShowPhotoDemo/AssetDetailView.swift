@@ -1,8 +1,8 @@
 //
-//  AssetDetailCollectionViewCell.swift
+//  AssetDetailView.swift
 //  ShowPhotoDemo
 //
-//  Created by WangHao on 2016/12/3.
+//  Created by WangHao on 2016/12/14.
 //  Copyright © 2016年 Tuluobo. All rights reserved.
 //
 
@@ -12,7 +12,7 @@ import PhotosUI
 import OLImageView.OLImage
 import SVProgressHUD
 
-class AssetDetailCollectionViewCell: UICollectionViewCell {
+class AssetDetailView: UIView {
     
     /// 数据源
     var asset: PHAsset? {
@@ -76,13 +76,13 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
         scrollView.addSubview(assetImageView)
         // PhotoLive
         scrollView.addSubview(assetPhotoLiveView)
-        contentView.addSubview(scrollView)
+        self.addSubview(scrollView)
         // Video
-        contentView.layer.addSublayer(playerLayer)
+        self.layer.addSublayer(playerLayer)
         // 播放按钮
-        contentView.addSubview(videoPlayBtn)
+        self.addSubview(videoPlayBtn)
         // 控制区
-        contentView.addSubview(controlView)
+        self.addSubview(controlView)
         controlView.addSubview(controlPlayBtn)
     }
     
@@ -199,7 +199,7 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
 }
 
 // MARK: - UIScrollViewDelegate
-extension AssetDetailCollectionViewCell: UIScrollViewDelegate {
+extension AssetDetailView: UIScrollViewDelegate {
     /// 返回一个scrollView的子控件进行缩放
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         if !self.assetImageView.isHidden {

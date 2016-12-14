@@ -19,13 +19,12 @@ class AssetDetailViewController: UIViewController {
     fileprivate var isShowing = false
     
     // MARK: 懒加载
-    /// CollectionView
-    fileprivate lazy var collectionView: UICollectionView = {
-        let clv = UICollectionView(frame: kScreenBounds, collectionViewLayout: AssetDetailLayout())
-        clv.delegate = self
-        clv.dataSource = self
-        clv.register(AssetDetailCollectionViewCell.self, forCellWithReuseIdentifier: kAssetDetailViewCell)
-        return clv
+    /// UIScrollView
+    fileprivate lazy var contentView: UIScrollView = {
+        let cv = UIScrollView(frame: kScreenBounds)
+        cv.isPagingEnabled = true
+        cv.delegate = self
+        return cv
     }()
     /// 返回按钮
     fileprivate lazy var closeBtn: UIButton = {
@@ -68,8 +67,8 @@ class AssetDetailViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // 添加子视图 CollectionView
-        self.view.addSubview(collectionView)
+        // 添加子视图 contentView
+        self.view.addSubview(contentView)
         // 去除自动调整 Scrollview
         automaticallyAdjustsScrollViewInsets = false
         // 关闭按钮
@@ -90,7 +89,9 @@ class AssetDetailViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         // 刷新数据
-        collectionView.scrollToItem(at: self.indexPath, at: .left, animated: false)
+        var offset = contentView.contentOffset
+        offset.x = CGFloat(indexPath.item) * kScreenWidth
+        contentView.setContentOffset(offset, animated: false)
         controlView.isHidden = !self.assetsResults[self.indexPath.item].representsBurst
     }
     
@@ -101,12 +102,11 @@ class AssetDetailViewController: UIViewController {
     
     /// 删除资源
     @objc private func deleteThisAsset() {
-        if let iPath = collectionView.indexPathsForVisibleItems.last {
-            let asset = assetsResults[iPath.item]
-            PHPhotoLibrary.shared().performChanges({
-                PHAssetChangeRequest.deleteAssets(NSArray(array: [asset]))
-            })
-        }
+        let row = Int(contentView.contentOffset.y / kScreenWidth)
+        let asset = assetsResults[row]
+        PHPhotoLibrary.shared().performChanges({
+            PHAssetChangeRequest.deleteAssets(NSArray(array: [asset]))
+        })
     }
     
     /// 选择连拍照片
@@ -117,8 +117,8 @@ class AssetDetailViewController: UIViewController {
             selectBtn.setTitle("查看连拍", for: .normal)
             isShowing = false
         } else{
-            if let indexPath = collectionView.indexPathsForVisibleItems.last, let identifier = assetsResults[indexPath.item].burstIdentifier {
-                
+            let row = Int(contentView.contentOffset.y / kScreenWidth)
+            if let identifier = assetsResults[row].burstIdentifier {
                 let options = PHFetchOptions()
                 options.includeAllBurstAssets = true
                 let assets = PHAsset.fetchAssets(withBurstIdentifier: identifier, options: options)
@@ -134,84 +134,22 @@ class AssetDetailViewController: UIViewController {
 }
 
 // MARK: UICollectionViewDelegatem, UICollectionViewDataSource
-extension AssetDetailViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+extension AssetDetailViewController: UIScrollViewDelegate {
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return assetsResults.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: kAssetDetailViewCell, for: indexPath) as! AssetDetailCollectionViewCell
-        cell.asset = assetsResults[indexPath.item]
-        return cell
-    }
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        isShowing = false
-        if let indexPath = collectionView.indexPathsForVisibleItems.last {
-            controlView.isHidden = !assetsResults[indexPath.item].representsBurst
-        }
-    }
+//    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+//        isShowing = false
+//        if let indexPath = collectionView.indexPathsForVisibleItems.last {
+//            controlView.isHidden = !assetsResults[indexPath.item].representsBurst
+//        }
+//    }
 
 }
 
 // MARK: PHPhotoLibraryChangeObserver
 extension AssetDetailViewController: PHPhotoLibraryChangeObserver {
     func photoLibraryDidChange(_ changeInstance: PHChange) {
-        DispatchQueue.main.async {
-            if let collectionChanges = changeInstance.changeDetails(for: self.assetsResults) {
-                self.assetsResults = collectionChanges.fetchResultAfterChanges
-                if collectionChanges.hasIncrementalChanges {
-                    var removedPaths = [IndexPath]()
-                    var insertedPaths = [IndexPath]()
-                    if let removed = collectionChanges.removedIndexes {
-                        removedPaths = self.indexPathsFromIndexSet(indexSet: removed)
-                    }
-                    if let inserted = collectionChanges.insertedIndexes {
-                        insertedPaths = self.indexPathsFromIndexSet(indexSet: inserted)
-                    }
-                    self.collectionView.performBatchUpdates(
-                        {
-                            if removedPaths.count > 0 {
-                                self.collectionView.deleteItems(at: removedPaths)
-                            }
-                            if insertedPaths.count > 0 {
-                                self.collectionView.insertItems(at: insertedPaths)
-                            }
-                    }, completion: nil)
-                } else {
-                    self.collectionView.reloadData()
-                }
-            }
- 
-        }
+        
     }
     
-    /// 将IndexSet 转 [IndexPath]
-    private func indexPathsFromIndexSet(indexSet: IndexSet) -> [IndexPath] {
-        var indexPaths = [IndexPath]()
-        for index in indexSet {
-            indexPaths.append(IndexPath(row: index, section: 0))
-        }
-        return indexPaths
-    }
-}
-
-// MARK: - 自定义布局
-class AssetDetailLayout: UICollectionViewFlowLayout {
-    // 准备布局
-    override func prepare() {
-        // 1.设置每一个 cell 的尺寸
-        itemSize = kScreenBounds.size
-        // 2.设置cell之间的间隙
-        minimumLineSpacing = 0
-        minimumInteritemSpacing = 0
-        // 3.设置滚动方向
-        scrollDirection = .horizontal
-        // 4.设置分页
-        collectionView?.isPagingEnabled = true
-        // 5.去除滚动条
-        collectionView?.showsVerticalScrollIndicator = false
-        collectionView?.showsHorizontalScrollIndicator = false
-    }
+    
 }
