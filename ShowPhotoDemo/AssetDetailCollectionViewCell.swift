@@ -1,18 +1,18 @@
 //
-//  AssetDetailView.swift
+//  AssetDetailCollectionViewCell.swift
 //  ShowPhotoDemo
 //
-//  Created by WangHao on 2016/12/14.
+//  Created by WangHao on 2016/12/3.
 //  Copyright © 2016年 Tuluobo. All rights reserved.
 //
 
 import UIKit
 import Photos
 import PhotosUI
-import OLImageView.OLImage
-import SVProgressHUD
+import YYImage
+import OLImageView
 
-class AssetDetailView: UIView {
+class AssetDetailCollectionViewCell: UICollectionViewCell {
     
     /// 数据源
     var asset: PHAsset? {
@@ -33,19 +33,20 @@ class AssetDetailView: UIView {
     }
     
     private func setupUI() {
-        self.backgroundColor = UIColor.black
         scrollView.frame = kScreenBounds
         // Image容器
         scrollView.addSubview(assetImageView)
         // PhotoLive
         scrollView.addSubview(assetPhotoLiveView)
-        self.addSubview(scrollView)
+        contentView.addSubview(scrollView)
         // Video
-        self.layer.addSublayer(playerLayer)
+        contentView.layer.addSublayer(playerLayer)
         // 播放按钮
-        self.addSubview(videoPlayBtn)
+        contentView.addSubview(videoPlayBtn)
+        // 进度指示器
+        contentView.addSubview(indicatorView)
         // 控制区
-        self.addSubview(controlView)
+        contentView.addSubview(controlView)
         controlView.addSubview(controlPlayBtn)
     }
     
@@ -63,13 +64,15 @@ class AssetDetailView: UIView {
         assetImageView.isHidden = true
         assetPhotoLiveView.livePhoto = nil
         assetPhotoLiveView.isHidden = true
+        
+        indicatorView.stopAnimating()
 
         guard let asset = asset else { return }
         if asset.mediaSubtypes == .photoLive {
             assetPhotoLiveView.isHidden = false
             let options = PHLivePhotoRequestOptions()
             options.deliveryMode = .highQualityFormat
-            SVProgressHUD.show()
+            indicatorView.startAnimating()
             DispatchQueue.global().async {
                 PHImageManager.default().requestLivePhoto(for: asset, targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFit, options: options, resultHandler: { (photoLive, info) in
                     DispatchQueue.main.async {
@@ -77,7 +80,7 @@ class AssetDetailView: UIView {
                         self.assetPhotoLiveView.frame = self.resetFrame(size: photoLive.size)
                         self.assetPhotoLiveView.livePhoto = photoLive
                         self.assetPhotoLiveView.startPlayback(with: .hint)
-                        SVProgressHUD.dismiss()
+                        self.indicatorView.stopAnimating()
                     }
                 })
             }
@@ -88,15 +91,21 @@ class AssetDetailView: UIView {
             options.isSynchronous = true
             options.deliveryMode = .highQualityFormat
             options.resizeMode = .exact
-            SVProgressHUD.show()
+            indicatorView.startAnimating()
             DispatchQueue.global().async {
                 PHImageManager.default().requestImageData(for: asset, options: options, resultHandler: { (data, _, _, _) in
                     guard let data = data else { return }
-                    guard let image = OLImage(data: data) else { return }
+                    var image: UIImage?
+                    if YYImageDetectType(data as CFData) == YYImageType.GIF {
+                        image = OLImage(data: data)
+                    } else {
+                      let decoder = YYImageDecoder(data: data, scale: 2.0)
+                      image = decoder?.frame(at: 0, decodeForDisplay: true)?.image
+                    }
                     DispatchQueue.main.async {
-                        self.assetImageView.frame = self.resetFrame(size: image.size)
                         self.assetImageView.image = image
-                        SVProgressHUD.dismiss()
+                        self.assetImageView.frame = self.resetFrame(size: image?.size ?? CGSize.zero)
+                        self.indicatorView.stopAnimating()
                     }
                 })
             }
@@ -105,7 +114,7 @@ class AssetDetailView: UIView {
                 videoPlayBtn.isHidden = false
                 playerLayer.isHidden = false
                 controlPlayBtn.isHidden = false
-                SVProgressHUD.show()
+                self.indicatorView.startAnimating()
                 DispatchQueue.global().async {
                     PHImageManager.default().requestAVAsset(forVideo: asset, options: nil, resultHandler: { (avAsset: AVAsset?, mix: AVAudioMix?, info: [AnyHashable: Any]?) -> Void in
                         DispatchQueue.main.async(execute: { () -> Void in
@@ -116,7 +125,7 @@ class AssetDetailView: UIView {
                             self.playerLayer.player = self.player
                             self.playerLayer.videoGravity = AVLayerVideoGravityResizeAspect
                             self.playerLayer.frame = self.resetFrame(size: CGSize(width: asset.pixelWidth, height: asset.pixelHeight))
-                            SVProgressHUD.dismiss()
+                            self.indicatorView.stopAnimating()
                         })
                     })
                 }
@@ -159,7 +168,7 @@ class AssetDetailView: UIView {
     }
     
     // MARK: 懒加载
-    /// 图片的Scroll容器
+    /// 图片的ScrollView容器
     fileprivate lazy var scrollView: UIScrollView = {
         let sv = UIScrollView()
         sv.delegate = self
@@ -195,10 +204,17 @@ class AssetDetailView: UIView {
         btn.addTarget(self, action: #selector(clickControlPlayBtn), for: .touchUpInside)
         return btn
     }()
+    /// 进度指示器
+    fileprivate lazy var indicatorView: UIActivityIndicatorView = {
+        let iView = UIActivityIndicatorView()
+        iView.center = self.contentView.center
+        return iView
+    }()
+
 }
 
 // MARK: - UIScrollViewDelegate
-extension AssetDetailView: UIScrollViewDelegate {
+extension AssetDetailCollectionViewCell: UIScrollViewDelegate {
     /// 返回一个scrollView的子控件进行缩放
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         if !self.assetImageView.isHidden {
