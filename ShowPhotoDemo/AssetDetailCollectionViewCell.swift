@@ -10,6 +10,7 @@ import UIKit
 import Photos
 import PhotosUI
 import OLImageView.OLImage
+import SVProgressHUD
 
 class AssetDetailCollectionViewCell: UICollectionViewCell {
     
@@ -99,47 +100,63 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
         assetImageView.isHidden = true
         assetPhotoLiveView.livePhoto = nil
         assetPhotoLiveView.isHidden = true
-        
+
         guard let asset = asset else { return }
         if asset.mediaSubtypes == .photoLive {
             assetPhotoLiveView.isHidden = false
             let options = PHLivePhotoRequestOptions()
             options.deliveryMode = .highQualityFormat
-            PHImageManager.default().requestLivePhoto(for: asset, targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFit, options: options, resultHandler: { (photoLive, info) in
-                guard let photoLive = photoLive else { return }
-                self.assetPhotoLiveView.frame = self.resetFrame(size: photoLive.size)
-                self.assetPhotoLiveView.livePhoto = photoLive
-                self.assetPhotoLiveView.startPlayback(with: .hint)
-            })
+            SVProgressHUD.show()
+            DispatchQueue.global().async {
+                PHImageManager.default().requestLivePhoto(for: asset, targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFit, options: options, resultHandler: { (photoLive, info) in
+                    DispatchQueue.main.async {
+                        guard let photoLive = photoLive else { return }
+                        self.assetPhotoLiveView.frame = self.resetFrame(size: photoLive.size)
+                        self.assetPhotoLiveView.livePhoto = photoLive
+                        self.assetPhotoLiveView.startPlayback(with: .hint)
+                        SVProgressHUD.dismiss()
+                    }
+                })
+            }
         } else {
             // 普通图片(png,jpg,gif) 和视频的缩略图
             assetImageView.isHidden = false
             let options = PHImageRequestOptions()
-            options.isSynchronous = false
+            options.isSynchronous = true
             options.deliveryMode = .highQualityFormat
             options.resizeMode = .exact
-            PHImageManager.default().requestImageData(for: asset, options: options, resultHandler: { (data, _, _, _) in
-                guard let data = data else { return }
-                guard let image = OLImage(data: data) else { return }
-                self.assetImageView.frame = self.resetFrame(size: image.size)
-                self.assetImageView.image = image
-            })
+            SVProgressHUD.show()
+            DispatchQueue.global().async {
+                PHImageManager.default().requestImageData(for: asset, options: options, resultHandler: { (data, _, _, _) in
+                    guard let data = data else { return }
+                    guard let image = OLImage(data: data) else { return }
+                    DispatchQueue.main.async {
+                        self.assetImageView.frame = self.resetFrame(size: image.size)
+                        self.assetImageView.image = image
+                        SVProgressHUD.dismiss()
+                    }
+                })
+            }
             
             if asset.mediaType == .video {
                 videoPlayBtn.isHidden = false
                 playerLayer.isHidden = false
                 controlPlayBtn.isHidden = false
-                PHImageManager.default().requestAVAsset(forVideo: asset, options: nil, resultHandler: { (avAsset: AVAsset?, mix: AVAudioMix?, info: [AnyHashable: Any]?) -> Void in
-                    DispatchQueue.main.async(execute: { () -> Void in
-                        guard let avAsset = avAsset else { return }
-                        let playItem = AVPlayerItem(asset: avAsset)
-                        playItem.audioMix = mix
-                        self.player.replaceCurrentItem(with: playItem)
-                        self.playerLayer.player = self.player
-                        self.playerLayer.videoGravity = AVLayerVideoGravityResizeAspect
-                        self.playerLayer.frame = self.resetFrame(size: CGSize(width: asset.pixelWidth, height: asset.pixelHeight))
+                SVProgressHUD.show()
+                DispatchQueue.global().async {
+                    PHImageManager.default().requestAVAsset(forVideo: asset, options: nil, resultHandler: { (avAsset: AVAsset?, mix: AVAudioMix?, info: [AnyHashable: Any]?) -> Void in
+                        DispatchQueue.main.async(execute: { () -> Void in
+                            guard let avAsset = avAsset else { return }
+                            let playItem = AVPlayerItem(asset: avAsset)
+                            playItem.audioMix = mix
+                            self.player.replaceCurrentItem(with: playItem)
+                            self.playerLayer.player = self.player
+                            self.playerLayer.videoGravity = AVLayerVideoGravityResizeAspect
+                            self.playerLayer.frame = self.resetFrame(size: CGSize(width: asset.pixelWidth, height: asset.pixelHeight))
+                            SVProgressHUD.dismiss()
+                        })
                     })
-                })
+                }
             }
         }
     }

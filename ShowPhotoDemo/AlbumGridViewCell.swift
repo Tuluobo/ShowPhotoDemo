@@ -46,8 +46,14 @@ class AlbumGridViewCell: UICollectionViewCell {
             }
             default: break
         }
-        PHImageManager.default().requestImage(for: asset, targetSize: kTargetSize, contentMode: .aspectFill, options: nil) { (image, info) in
-            self.thumbImageView.image = image
+        DispatchQueue.global().async {
+            let options = PHImageRequestOptions()
+            options.isSynchronous = true
+            PHImageManager.default().requestImage(for: asset, targetSize: kTargetSize, contentMode: .aspectFill, options: options) { (image, info) in
+                DispatchQueue.main.async {
+                    self.thumbImageView.image = image
+                }
+            }
         }
     }
 }
