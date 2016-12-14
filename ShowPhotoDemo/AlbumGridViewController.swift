@@ -98,13 +98,38 @@ class PhotoCollectionViewFlowLayout: UICollectionViewFlowLayout {
 extension AlbumGridViewController: PHPhotoLibraryChangeObserver {
     func photoLibraryDidChange(_ changeInstance: PHChange) {
         DispatchQueue.main.async {
-            if let assetsResults = self.assetsResults {
-                if let change = changeInstance.changeDetails(for: assetsResults) {
-                    if change.hasIncrementalChanges {
-                        self.refreshData()
-                    }
+            guard let assetsResults = self.assetsResults, let collectionChanges = changeInstance.changeDetails(for: assetsResults) else { return }
+            self.assetsResults = collectionChanges.fetchResultAfterChanges
+            if collectionChanges.hasIncrementalChanges {
+                var removedPaths = [IndexPath]()
+                var insertedPaths = [IndexPath]()
+                if let removed = collectionChanges.removedIndexes {
+                    removedPaths = self.indexPathsFromIndexSet(indexSet: removed)
                 }
+                if let inserted = collectionChanges.insertedIndexes {
+                    insertedPaths = self.indexPathsFromIndexSet(indexSet: inserted)
+                }
+                self.collectionView?.performBatchUpdates(
+                    {
+                        if removedPaths.count > 0 {
+                            self.collectionView?.deleteItems(at: removedPaths)
+                        }
+                        if insertedPaths.count > 0 {
+                            self.collectionView?.insertItems(at: insertedPaths)
+                        }
+                }, completion: nil)
+            } else {
+                self.collectionView?.reloadData()
             }
         }
+    }
+    
+    /// 将IndexSet 转 [IndexPath]
+    private func indexPathsFromIndexSet(indexSet: IndexSet) -> [IndexPath] {
+        var indexPaths = [IndexPath]()
+        for index in indexSet {
+            indexPaths.append(IndexPath(row: index, section: 0))
+        }
+        return indexPaths
     }
 }
