@@ -10,7 +10,6 @@ import UIKit
 import Photos
 import PhotosUI
 import YYImage
-import OLImageView
 
 class AssetDetailCollectionViewCell: UICollectionViewCell {
     
@@ -95,12 +94,18 @@ class AssetDetailCollectionViewCell: UICollectionViewCell {
             DispatchQueue.global().async {
                 PHImageManager.default().requestImageData(for: asset, options: options, resultHandler: { (data, _, _, _) in
                     guard let data = data else { return }
+                    guard let decoder = YYImageDecoder(data: data, scale: 1.0) else { return }
                     var image: UIImage?
-                    if YYImageDetectType(data as CFData) == YYImageType.GIF {
-                        image = OLImage(data: data)
+                    if decoder.type == YYImageType.GIF {
+                        var images = [UIImage]()
+                        var duration: TimeInterval = 0.0
+                        for i in 0..<decoder.frameCount {
+                            images.append(decoder.frame(at: i, decodeForDisplay: true)!.image!)
+                            duration += decoder.frameDuration(at: i)
+                        }
+                        image = UIImage.animatedImage(with: images, duration: duration)
                     } else {
-                      let decoder = YYImageDecoder(data: data, scale: 2.0)
-                      image = decoder?.frame(at: 0, decodeForDisplay: true)?.image
+                        image = decoder.frame(at: 0, decodeForDisplay: true)?.image
                     }
                     DispatchQueue.main.async {
                         self.assetImageView.image = image
